@@ -1,0 +1,73 @@
+{% set count = namespace(value=1) %}
+S.NO,QID,SUBTASK_ID,COUNT,XXX 
+{% for each in (jira_closed_task_report_auto_mul_val.split( '\n' ))[:-1]  %}
+{{ count.value }},{{ each }}
+{% set count.value = count.value + 1 %}
+{% endfor %}
+
+
+createdDate: "{{ (issue_fetch.meta.fields.created.split('.')[0].split('T') | join(' ') | to_datetime ).strftime('%d-%^b-%y %I.%M.%S.%f %p') }}"
+
+- name: Create JIRA issues based upon DB table output where atleast one entry without APP_OWNER_RESPONSIBLE
+  jira:
+    uri: '{{ jira_base_url }}'
+    username: "{{ jira_user }}"
+    password: '{{ cvmp_cyberark_jira_password }}'
+    project: '{{ jira_project_name }}'
+    operation: create
+    issuetype: Task
+    summary: '{{ db_query_output[0][0] }} - {{ db_query_output[0][3] }}'
+    description: 'Please be informed for the Vulnerability - {{ db_query_output[0][3] }}'
+    assignee: "{{ jira_user }}"
+    timeout: 60
+  args:
+    fields:
+      priority: 
+        name: "{% if max_NVSS|int < 35 %}HIGH{% else %}Not classified{% endif %}"
+        id: "{% if max_NVSS|int < 35 %}3{% else %}14{% endif %}"
+      labels:
+        - 'score_{{ max_NVSS|int }}'
+        - 'RF'
+        
+  +++++++++++++++++++++++++++++++++
+  
+  #Put %e is used to removed the leading zero before the date value
+  - name: Capture the Current day & 3 Days before date to delete mails
+    set_fact:
+      jira_ooo_current: "{{ (ansible_date_time.date|to_datetime('%Y-%m-%d')).strftime('%b %e') }}"
+      jira_ooo_one_day: "{{ '%b %e'|strftime(ansible_date_time.epoch|int - (86400 * 1 )) }}"
+      jira_ooo_second_day: "{{ '%b %e'|strftime(ansible_date_time.epoch|int - (86400 * 2 )) }}"
+      jira_ooo_third_day: "{{ '%b %e'|strftime(ansible_date_time.epoch|int - (86400 * 3 )) }}"
+      
+      +++++++++++++++++++++++++++++++++++++++++++++++++
+      
+      - name: Get the latest mail ID
+        shell: mail -u ooo -H | grep -iw "ooo-mail {{ jira_ooo_date }}" | tail -1 | sed 's/U\|N\|>//g' | awk '{print $1}'
+        register: jira_ooo_mail_id
+        
+
+      - name: Print the message ID value
+        debug:
+          msg: '{{ jira_ooo_mail_id.stdout_lines | default("Empty_value") }}'
+       
+
+      - name: Get the mail content of Message ID
+        shell: echo "{{ jira_ooo_mail_id.stdout_lines[0] }}" | mail -u ooo -N| sed -n '/[Ee][Mm][Aa][Ii][Ll]-[iI][Dd]/,$p' | sed 's/[Ee][Mm][Aa][iI][Ll]-[iI][Dd]//gi'| sed 's/[Hh][Ee][Ll][Dd]/& \n/'| sed 's/[hH][Ee][Ll][Dd]//g'| head -n -1|awk 'NF'
+        register: jira_ooo_mail_content
+        when: jira_ooo_mail_id.stdout_lines|length > 0
+        
++++++++++++++++++++++++++++++++++=
+
+  - name: Get the Severity value from this {{ _mail_id }} Mail ID
+    shell:
+      cmd: echo "{{_mail_id }}" | mail -u rf -N |grep -i "^CVE-*" | egrep "is now|are now" | head -{{ item|int }} | tail -1 | awk -F"[" '{print $1}' | awk '$1=$1'  RS=", | and | are now |is now"| tail -1
+    register: priority_value
+
+  - debug:
+      msg: '{{ priority_value.stdout_lines }}'
+
+
+  - name: By using above Severity map with CVE value from this {{ _mail_id }} Mail ID if ransomware available in subject(Add yes)
+    shell:
+     cmd: echo "{{_mail_id }}" | mail -u rf -N |grep -i "^CVE-*" | egrep "is now|are now" | head -{{ item|int }} | tail -1 | awk -F"[" '{print $1}' | awk '$1=$1' RS=",| and | are now |is now" |sed '$ d'| awk -v sev="{{ priority_value.stdout_lines[0] }}" '{print $1";"sev";""Yes"}'
+    register: _cve_yes_value

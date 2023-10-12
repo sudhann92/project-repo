@@ -1,0 +1,105 @@
+#login as root
+yum install apr-devel openssl-devel
+
+#login as the user tomcat runs under
+cd /app/tomcat/apache-tomcat-8.5.66/bin
+tar xzvf tomcat-native.tar.gz
+cd tomcat-native-1.2.28-src/native
+#set JAVA_HOME (the one from Oracle will do)
+#commands to compile option, dependent on Oracle version
+JAVA_HOME=/u01/app/oracle/product/19.15.0.0/cl220419a/jdk
+export JAVA_HOME
+./configure
+make
+#login as root and cd to tomcat-native-1.2.28-src/native
+make install
+#see where the libraries are installed, /usr/local/apr/lib
+
+login as the users tomcat runs under
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/apr/lib
+export LD_LIBRARY_PATH
+add above lines to the start of bin/setenv.sh
+
+From make install
+[root@ap-ttr1t ~]# cd /app/tomcat/apache-tomcat-8.5.66/bin/tomcat-native-1.2.28-src/native
+[root@ap-ttr1t native]# make install
+make[1]: Entering directory `/app/tomcat/apache-tomcat-8.5.66/bin/tomcat-native-1.2.28-src/native'
+make[1]: Nothing to be done for `local-all'.
+make[1]: Leaving directory `/app/tomcat/apache-tomcat-8.5.66/bin/tomcat-native-1.2.28-src/native'
+/usr/lib64/apr-1/build/mkdir.sh /usr/local/apr/lib
+mkdir /usr/local/apr
+mkdir /usr/local/apr/lib
+/bin/sh /usr/lib64/apr-1/build/libtool --mode=install /usr/bin/install -c -m 755 libtcnative-1.la /usr/local/apr/lib
+libtool: install: /usr/bin/install -c -m 755 .libs/libtcnative-1.so.0.2.28 /usr/local/apr/lib/libtcnative-1.so.0.2.28
+libtool: install: (cd /usr/local/apr/lib && { ln -s -f libtcnative-1.so.0.2.28 libtcnative-1.so.0 || { rm -f libtcnative-1.so.0 && ln -s libtcnative-1.so.0.2.28 libtcnative-1.so.0; }; })
+libtool: install: (cd /usr/local/apr/lib && { ln -s -f libtcnative-1.so.0.2.28 libtcnative-1.so || { rm -f libtcnative-1.so && ln -s libtcnative-1.so.0.2.28 libtcnative-1.so; }; })
+libtool: install: /usr/bin/install -c -m 755 .libs/libtcnative-1.lai /usr/local/apr/lib/libtcnative-1.la
+libtool: install: /usr/bin/install -c -m 755 .libs/libtcnative-1.a /usr/local/apr/lib/libtcnative-1.a
+libtool: install: chmod 644 /usr/local/apr/lib/libtcnative-1.a
+libtool: install: ranlib /usr/local/apr/lib/libtcnative-1.a
+libtool: finish: PATH="/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/sbin" ldconfig -n /usr/local/apr/lib
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /usr/local/apr/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+
+
+To make the SSL certificate:
+
+Infor needed:
+
+#Run
+keytool -keystore tomcat.jks -genkey -alias tomcat -keyalg RSA -keysize 2048 -sigalg SHA1withRSA
+
+Enter this to the keytool:
+Private key: (host (eks. ap-trmai1p.oneadre.net), Nordea Bank Abp, Nordea IT, Helsinki, Helsinki, FI
+
+
+What is your first and last name?
+  [ap-ttr1t.oneadr.net]: 
+What is the name of your organizational unit?
+  [Nordea IT]:
+What is the name of your organization?
+  [Nordea Bank Abp]:
+What is the name of your City or Locality?
+  [Helsinki]:
+What is the name of your State or Province?
+  [Helsinki]:
+What is the two-letter country code for this unit?
+  [FI]:
+Is CN=ap-ttr1t.oneadr.net, OU=Nordea IT, O=Nordea Bank Abp, L=Helsinki, ST=Helsinki, C=FI correct?
+  [no]:  yes
+
+
+Make a request to be used in venafi:
+keytool -keystore tomcat.jks -certreq -alias tomcat -keyalg RSA -keysize 2048 -sigalg SHA1withRSA -file tomcat_certreq.csr
+
+venafi, created new certificate
+
+DNS SUBJECT ALTERNATIVE NAMES
+Add the urls's that you want this certificate to work for:
+eks:
+ap-tt1t
+ap-mifid2a1s
+ap-mid2ma1s.dr.net
+ap-t1t.adr.net
+
+past in the text in tomcat_certreq.csr
+
+Download in .PEM (1.selection PEM (PKCS #8)) (With root links)
+
+keytool -import -alias tomcat -keystore tomcat.jks -trustcacerts -file ap-ttr1t.oneadr.net.pem 

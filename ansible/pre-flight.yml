@@ -1,0 +1,46 @@
+---     
+- block:
+
+  - name: preflight | verify tower_env
+    assert:
+      that:
+        - "tower_env|default('',true)|lower in ['test_sandbox','test_dev', 'test_preprod','test_prod']"
+      fail_msg: "'tower_env' value is not valid (accepted values: test_sandbox, test_dev, test_preprod, test_prod)"
+ 
+  - name: Load all variables file based on the environment
+    include_vars:
+       dir: "../../vars/{{ tower_env|default('blah') }}"
+ 
+  - name: preflight | verify input variables
+    assert:
+      that:
+        - "{{ item }}|default('',true) != ''"
+      fail_msg: "Make sure {{ item }} value is not empty"
+    with_items:
+      - test_host
+      - admin_oauth_token
+      - app_code
+      - app_code_mail
+
+  - name: Set fact for organization
+    set_fact:
+      admin_org: "{{ app_code|lower|trim }}_admin_org_user" 
+      app_code_adm_pass: "{{ lookup ('password', '/dev/null length=20 chars=digits,ascii_letters,digits') }}"
+      org_name: "{{ app_code|upper }}"
+
+  - name: Assert that app_code is valid
+    assert:
+      that:
+        - app_code | regex_search ('^[A-Z0-9]+$')
+      fail_msg: 
+        - "Make sure organization name follow with naming standards "
+
+
+  - name: Assert that app_code_mail is valid mail
+    assert:
+      that:
+        - app_code_mail | regex_search ('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+      fail_msg: "Make sure app_code_mail is valid mail"
+
+  tags:
+    - always

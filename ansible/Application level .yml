@@ -1,0 +1,29 @@
+        - name: Run Application level backup script
+          shell: "command to run in server end"
+          args:
+            chdir: "{{ aap_setup_path }}{{ bundle_name }}/"
+          register: backup_command
+          async: 3000  #seconds 
+          poll: 0
+  
+        - name: checking job completion
+          async_status:
+             jid: "{{ backup_command.ansible_job_id }}"
+          register: job_result
+          until: job_result.finished
+          retries: 50
+          delay: 60
+  
+        - name: "Find all backup files older than {{ pg_bfiles_remove_time }} in {{ backup_destination }}"
+          find:
+            paths: "{{ backup_destination }}"
+            recurse: yes
+            age: "{{ pg_bfiles_remove_time }}"
+            age_stamp: "mtime"
+          register: _pg_old_backups
+  
+        - name: "Remove all backup files older than {{ pg_bfiles_remove_time }} from {{ backup_destination }}"
+          file:
+             state: absent
+             path: "{{ item.path }}"
+          with_items: "{{ _pg_old_backups.files }}"

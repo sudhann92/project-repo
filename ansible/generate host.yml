@@ -1,0 +1,56 @@
+- name: Generate tower hosts
+  hosts: localhost
+  gather_facts: no
+  vars:
+    use_cyberark: true
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  tasks:
+    - name: preflight | validate value of tower_env
+      assert:
+        that: tower_env in acceptable_tower_env
+        fail_msg: "Invalid request! 'tower_env' has an invalid value. Supported values are {{  acceptable_tower_env  }}"
+        success_msg: "Variable 'tower_env' passed value validation!"
+        quiet: true
+
+    - import_tasks: cyberark.yml
+      when: use_cyberark | bool
+
+    - name: "build hosts_env for {{ tower_env }}"
+      set_fact:
+        hosts_env: "{{ hosts_env | default ([]) }} + [ {{ lookup ('vars', item) }}]"
+      with_items: "{{ tower_env }}"
+
+    - name: Generate dynamic group using CyberArk
+      add_host:
+        name: "{{ item }}"
+        groups: "{{ tower_env }}"
+        ansible_ssh_user: "{{ svc_account }}"
+        ansible_password: "{{ ssh_password }}"
+      no_log: true
+      with_items: "{{ hosts_env }}"
+      when: use_cyberark | bool
+
+    - name: Generate dynamic group without CyberArk
+      add_host:
+        name: "{{ item }}"
+        groups: "{{ tower_env }}"
+      no_log: true
+      with_items: "{{ hosts_env }}"
+
+- name: Identify reachable hosts
+  hosts: awx,!localhost
+  gather_facts: no
+  ignore_unreachable: true
+
+  tasks:
+    - shell: "echo 0"
+      register: shell_out
+
+    - meta: clear_host_errors
+
+    - name: "limit only reachable hosts"
+      group_by:
+         key: "awx_available_{{shell_out.changed | bool | lower }}"
+
+# TODO: if performance issues occur on PROD when running all Helix jobs from the same node - ADD some task to choose
+# random host from awx_available_true

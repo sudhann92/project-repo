@@ -1,0 +1,17 @@
+---
+
+- name: Execute SQL
+  oracle_sql:
+    username: "{{ user | default(omit) }}"
+    password: "{{ password | default(omit) }}"
+    service_name: "{{ item.service }}"
+    hostname: "{{ item.ip | default(omit) }}"
+    sql: "{{ oracle_sql_query }}"
+    port: "{{ port | default(1521) }}"
+  environment:
+    ORACLE_HOME: "{{ sql_oracle_home }}"
+    LD_LIBRARY_PATH: "{{ sql_oracle_home }}/lib"
+  with_items:
+    - "{{ oracle_sql_hosts }}"
+  register: oracle_sql_out
+  when: set_oracle

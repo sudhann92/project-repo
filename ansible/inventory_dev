@@ -1,0 +1,7 @@
+[dev]
+localhost ansible_connection=local
+
+# do not change awx group name - name used as static value in helix select_host playbook,
+# the only way to not include tower_env variable in awx job template
+[awx:children]
+dev

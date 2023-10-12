@@ -1,0 +1,27 @@
+[preprod]
+localhost ansible_connection=local
+
+# do not change awx group name - name used as static value in helix select_host playbook,
+# the only way to not include tower_env variable in awx job template
+[awx:children]
+preprod
+
+
+[controller]
+localhost ansible_connection=local
+
+[controller:vars]
+tower_env=AAP_PREPRD
+
+AAP_sandbox_url='xxxxx.local'
+AAP_dev_url='xxxxx.local'
+AAP_PREPRD_url='xxxx.local'
+AAP_PRD_url='xxxx.net'
+AAP_TEST_url='xxxx.local
+
+
+[AAP_SERVER]
+1233
+1234
+dgdgfd
+gggh

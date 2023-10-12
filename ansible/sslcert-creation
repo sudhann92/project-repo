@@ -1,0 +1,133 @@
+SSL certificate creation steps in Linux Server: 
+
+Switch to Root 
+
+Create Directory 
+
+Run the below command 
+
+# openssl genrsa -out server name 2048 
+
+        Command to create *.key file 
+
+# openssl req -new -sha256 -key servername.key -out servrname.csr 
+
+       Command to create *.csr file 
+
+Following are the details need to give while running the above command 
+
+Country Name (2 letter code) [XX]:xx 
+
+State or Province Name (full name) []:xx 
+
+Locality Name (eg, city) [Default City]:xx 
+
+Organization Name (eg, company) [Default Company Ltd]:xx
+
+Organizational Unit Name (eg, section) []:xx 
+
+Common Name (eg, your name or your server's hostname) []:server name 
+
+Email Address []:Mail_dL
+
+Hit enter for subsequent questions 
+
+Create certificate in venafi using csr and other details and wait for approval 
+
+Go to inventory option and select Certificates 
+
+Click on Create New Certificate 
+
+ 
+
+Select Oneadr SHA 2 option 
+
+Then in Nickname provide hostname: Eg: ap-aapctrloe02c.oneadr.net 
+
+In Contact provide DL 
+ 
+
+Note: Remove Admin and Always put DL Only  
+
+Scroll Down, In Application code provide  
+
+Scroll Down, In Server Admin Put Technical Provider, Product Owner GID . 
+
+ 
+
+(Note: Do not Provide DL in Server Admin ) 
+
+Click on Next 
+
+Paste the created CSR in Enter CSR Box 
+ 
+
+Click on Next  
+
+Click on Next 
+
+Click on Create Certificate 
+
+Download certificate from venafi once you received mail for download 
+
+Downloaded certificate in *.pem format (refer above screenshots ) and convert to *.cert(mv file.pem file.cert) 
+
+Backup the /etc/tower/ folder from the server 
+
+Once done, upload the cert and key file to server (/etc/tower/) with same name as tower.cert and tower.key and restart nginx (service nginx restart) 
+
+ 
+
+Certificate Verification: 
+
+  1.  # openssl x509 -in [certificate-file.cert]   -text -noout 
+
+ 2. #  openssl rsa -noout -modulus -in [key-file.key] 
+
+
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
+
+[ dn ]
+C={{ csr_create_country | default('FI') }}
+L={{ csr_create_location | default('Helsinki') }}
+ST={{ csr_create_state | default('Helsinki') }}
+O={{ csr_create_organization | default('Nordea Bank Abp') }}
+OU={{ csr_create_organizational_unit | default('Nordea IT') }}
+CN = {{ csr_create_cn }}
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+{% for alt_name in csr_create_alt_names %}
+DNS.{{ loop.index }} =  {{ alt_name }}
+{% endfor %}
+
+#cat req.conf
+
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+C = SG
+ST = SG
+L = Singapore
+O = RHB Bank
+OU = IT
+CN = <what name should need to give>
+[v3_req]
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = <what name should need to give>
+DNS.2 = <what name should need to give>
+DNS.3 = <what name should need to give>
+
+Command to generate new CSR -> openssl req -new -out <server name>.csr -newkey rsa:2048 -nodes -sha256 -keyout <server name>.key.temp -config req.conf
+Command to check CSR -> openssl req -text -noout -verify -in <server name>.csr
+Output key to new file -> openssl rsa -in <server name>.key.temp -out <server name>.key
