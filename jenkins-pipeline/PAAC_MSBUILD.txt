@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+
+                // Clone your Git repository here if needed
+                git(url: 'https://github.com/your/repo.git', branch: 'master', credentialsId: 'credentials-id')
+
+            }
+
+        }
+        stage('Build and Analyze') {
+            agent {
+                label 'win_16'
+            }
+            steps {
+                // Build your .NET project using MSBuild
+                bat 'msbuild.exe /t:Rebuild /p:Configuration=Release'
+                // Execute SonarQube analysis using the SonarScanner for MSBuild
+                withSonarQubeEnv('SonarQube') {
+                    bat "MSBuild.SonarQube.Runner.exe begin /k:project-key /n:project-name /v:1.0"
+                    bat 'msbuild.exe /t:Rebuild'
+                    bat "MSBuild.SonarQube.Runner.exe end"
+                }
+            }
+        }
+    }
+    post {
+        success {
+            // Actions to perform when the pipeline succeeds
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            // Actions to perform when the pipeline fails
+            echo 'Pipeline failed!'
+        }
+    }
+}

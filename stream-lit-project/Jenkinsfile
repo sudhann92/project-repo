@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    
+    environment {
+        GITHUB_REPO_URL = 'https://github.com/sudhann92/mywork.git'
+        DOCKER_HUB_USERNAME = 'sudhan92'
+        DOCKER_HUB_REPO = 'streamlit_new_image'
+        DOCKER_IMAGE_TAG = "$BUILD_NUMBER"
+    }
+    
+    stages {
+        stage('Clone GitHub Repository') {
+            steps {
+                git(url: "$GITHUB_REPO_URL", branch: 'adding_new_python', credentialsId: 'pat_jenkins')
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def dockerImage = docker.build("${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPO}:${DOCKER_IMAGE_TAG}", './stream-lit-project/')
+                }
+            }
+        }
+        
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry("https://registry.hub.docker.com", "docker-hub-credentials-id") {
+                        def dockerImage = docker.image("${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPO}:${DOCKER_IMAGE_TAG}")
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+        
+        stage('Run Docker Container Locally') {
+            steps {
+                script {
+                    def containerName = "${DOCKER_HUB_REPO}-local"
+                    def runContainerCmd = "docker run -d -p 8501:8501 --name ${containerName} ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPO}:${DOCKER_IMAGE_TAG}"
+                    sh returnStatus: true, script: runContainerCmd
+                }
+            }
+        }
+    }
+}

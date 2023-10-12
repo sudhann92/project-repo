@@ -1,0 +1,7 @@
+## Create this file under /etc/ansible/group_vars/
+---
+ansible_user: admin
+ansible_password: kRc7$-sjF87
+ansible_port: 5985
+ansible_connection: winrm
+ansbile_winrm_server_cert_validation: ignore

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+process="$1"
+
+if [ -z "$process" ]
+then
+       echo "Message: string not supplied as argument!";
+       echo "Statistic: 0";
+exit 4;
+
+elif [ "$(ps -ef|grep "$process"|grep -v grep|grep -v $0 | wc -l)" -ne 0 ]
+then
+        echo "Message.Statistic:$process is running"
+        echo "Statistic: 1";
+exit 0;
+else
+        echo "Message.Statistic:$process is not running"
+        echo "Statistic: 0";
+exit 1;
+fi

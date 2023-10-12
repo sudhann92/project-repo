@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    
+    environment {
+        GITHUB_REPO_URL = 'https://github.com/sudhann92/mywork.git'
+        DOCKER_HUB_USERNAME = 'sudhan92'
+        registryCredential = 'ecr:us-east-1:aws_ecr_access'
+        registory_url_image = "411331341867.dkr.ecr.us-east-1.amazonaws.com/stream-lit-app"
+        registory_url = "https://411331341867.dkr.ecr.us-east-1.amazonaws.com"
+        DOCKER_IMAGE_TAG = "latest"
+        
+    }
+    
+    stages {
+        stage('Clone GitHub Repository') {
+            steps {
+                git(url: "$GITHUB_REPO_URL", branch: 'adding_new_python', credentialsId: 'pat_jenkins')
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build( "${registory_url_image}:$BUILD_NUMBER", './stream-lit-project/')
+                }
+            }
+        }
+        
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry("registory_url", "registryCredential") {
+                        def dockerImage = docker.image("${registory_url_image}:$BUILD_NUMBER")
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+        
+    }
+}

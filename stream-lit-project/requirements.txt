@@ -1,0 +1,8 @@
+### dependency
+streamlit
+pandas
+pathlib
+datetime
+#tempfile
+#base64
+openpyxl

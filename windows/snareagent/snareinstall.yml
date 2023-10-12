@@ -1,0 +1,52 @@
+## Before create the Ansible playbook:
+## Install the Snare agent manually in one of the server.Give the parmeters manually 
+## After installation naviagate to the installed snare path through command prompt
+## Enter the command snarecore.exe -x you could see the parameter which you given on installation time
+## Then Export that Information file by using snarecore.exe -x setting.inf you could see one file in your installed snare agent path
+## Copy that inf file and source .exe file to ansible control node 
+## You can use this command for silent installation with your paramater "SnareForWindows-4.0.1.2-MultiArch.exe /verysilent /LoadInf="settings.inf""
+## Then write the Ansible playbook by using win modules
+
+
+---
+ - hosts: windows
+   gather_facts: no
+   tasks:
+   
+ # Given the admin privileage to the user
+
+   - name: grant the ansible user the SeTcbPrivilege right
+     win_user_right:
+       name: SeTcbPrivilege
+       users: '{{ansible_user}}'
+       action: add
+
+# Copied the source files to destination server
+
+   - name : Copy to destination server
+     win_copy:
+         src: /tmp/snare/
+         dest: C:\Users\Administrator\Downloads
+         backup: yes
+
+# Installed the packages to destination server
+
+   - name: Install the packages
+     win_command: SnareForWindows-4.0.1.2-MultiArch.exe /verysilent /LoadInf="settings.inf"
+     args:
+       chdir: C:\Users\Administrator\Downloads
+
+#Check the service status
+
+   - name: Service status
+     win_service:
+        name: snare
+        state: started
+
+# Removed the source file from the destination server
+
+   - name: Remove the source file
+     win_file:
+        path: C:\Users\Administrator\Downloads\SnareForWindows-4.0.1.2-MultiArch.exe
+        state: absent
+
