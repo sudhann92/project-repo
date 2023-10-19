@@ -1,0 +1,58 @@
+Parameters:
+  keyNameValue:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Ec2 login Key value
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+Mappings: 
+  RegionMap: 
+    us-east-1: 
+      "AMI": "ami-0df435f331839b2d6"
+    us-west-1: 
+      "AMI": "ami-0c87a756f3fd22df2"
+  KeypairMap:
+     us-east-1:
+       "KEY": "newprivate"
+     us-west-1:
+        "KEY": "newprivate-west"
+Resources:
+  MyInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties: 
+         InstanceType: !Ref InstanceTypeParameter
+         ImageId: !FindInMap
+            - RegionMap
+            - !Ref AWS::Region
+            - AMI 
+         KeyName: !Ref keyNameValue
+         Tags:
+          - Key: "Name"
+            Value: !Join ["-" , [new, instance, cloud]]
+         SecurityGroups:
+            - !Ref InstanceSecurityGroupStack
+
+  InstanceSecurityGroupStack:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+Outputs:
+  InstanceID:
+    Description: The Instance ID
+    Value: !GetAtt MyInstance.PublicDnsName
