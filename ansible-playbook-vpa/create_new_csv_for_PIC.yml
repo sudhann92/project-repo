@@ -1,0 +1,61 @@
+---
+  - name: run the python script
+    ansible.builtin.shell: python pyexe.py {{pic_va.pic_value}}
+    register: _file_path
+
+  - debug:
+       msg: '{{ _file_path.stdout }}'
+
+
+  - name: Create the Jira task 
+    jira:
+      uri: '{{ jira_base_url }}'
+      username: "{{ jira_user }}"
+      password: '{{ cvmp_cyberark_jira_password }}'
+      project: '{{ jira_project_name }}'
+      operation: create
+      issuetype: Task
+      summary: '{{ansible.time_date}} Consolidated monthly report'
+      description: 'Please be informed for the Vulnerability - {{ db_query_output[0][3] }}'
+      assignee: "{{ _PIC_value.PIC_EID }}"
+      timeout: 60
+    args:
+      fields:
+        priority: 
+          name: "{% if max_NVSS|int < 35 %}HIGH{% else %}Not classified{% endif %}"
+          id: "{% if max_NVSS|int < 35 %}3{% else %}14{% endif %}"
+        labels:
+          - 'score_{{ max_NVSS|int }}'
+          - 'RF'
+    register: issue_value
+
+
+
+  - name: Create the Jira task 
+    jira:
+      uri: '{{ jira_base_url }}'
+      username: "{{ jira_user }}"
+      password: '{{ cvmp_cyberark_jira_password }}'
+      project: '{{ jira_project_name }}'
+      operation: attach
+      issue: '{{ issue_value.meta.key }}'
+      attachment:
+         filename: topsecretreport.xlsx
+      timeout: 60
+
+
+  - name: Sending mail to concern PIC
+    mail:
+      host: SMTP.RHB.com
+      port: 25
+      from: vulnerability@thbgroup.com
+      to: '{{ _PIC_value.PIC_mailaddres}}'
+      subject: 'Vulnerability for {{ month }}'
+      subtype: html
+      body: " Kindly work on the Vulnerability below are SLA
+               Critical         : 14 days
+               High             : 30 days
+               Medium           : 60 days
+               Low              : 90 days"
+      attach: "File name"
+    
