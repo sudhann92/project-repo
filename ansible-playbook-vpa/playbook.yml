@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  gather_facts: False
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    jira_base_url: https://rhbsgp.atlassian.net/rest/api/latest/issue
+    jira_user:
+    VPA_jira_password: 
+
+
+  tasks:
+   - name: read the csv file
+     read_csv:
+        path: /tmp/testing.csv
+        delimiter: ','
+     register: _read_content
+
+
+   - set_fact:
+       PIC_value: '{{ PIC_value|default([]) + [{"pic_value" :  _content_from_csv.PIC, "PIC_EID" :  _content_from_csv.EID, "PIC_mailaddres" :  _content_from_csv.email_address}] }}'
+     loop: "{{ _read_content.list }}"
+     loop_control:
+        loop_var: _content_from_csv
+
+   - set_fact:
+       unique_pic_value: '{{ PIC_value | unique }}'
+
+
+   - include_tasks: create_new_csv_for_PIC.yml
+     loop: '{{unique_pic_value}}'
+     loop_control:
+        loop_var: pic_va
