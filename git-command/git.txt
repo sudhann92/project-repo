@@ -1,0 +1,19 @@
+  541  git diff
+  542  git diff --cached
+  543  git restore --staged jupiter1.rb --> After git add . command want to restore we can use this command
+  544  git status
+  545  git diff
+  546  git add .
+  547  git commit -m "playbook"
+  548  clear
+  549  git status
+  550  git diff
+  551  git diff --cached
+  552  git log --oneline
+  553  git diff 358d7f8..a886cb6
+  554  git revert HEAD  --> After commit tis command is used to revert to older version
+  555  cat jupiter1.rb
+  556  git log --oneline
+  557  clear
+  558  git log --oneline
+  559  git reset --hard 358d7f8 -- > After commit tis command is used to revert to older version
