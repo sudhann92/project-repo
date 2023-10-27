@@ -1,0 +1,46 @@
+- hosts: docker
+  become: true
+  become_method: sudo
+  vars:
+    image_name: httpd
+    file: home.html
+    docker_volume: /webpage/
+    docker_host_port: 8000
+    docker_container_port: 80
+  tasks:
+    - name: start docker services
+      service:
+        name: "docker"
+        state: started
+        enabled: yes
+
+    - name: Creates directory
+      file:
+        path: '{{docker_volume}}'
+        state: directory
+        mode: 0775
+
+    - name: pull an image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        source: pull
+
+    - name: Copy HTML code to Hosts
+      template:
+        src: "{{ file }}"
+        dest: "{{ docker_volume }}"
+
+    - name: Run docker container
+      docker_container:
+        name: webserver
+        image: "{{ image_name }}"
+        interactive: yes
+        volumes: 
+          - "{{ docker_volume }}:/usr/local/apache2/htdocs"
+        ports:
+          - "{{ docker_host_port }}:{{ docker_container_port }}"
+        command: httpd -D FOREGROUND
+      register: _output_docker
+
+    - debug:
+         msg: '{{ _output_docker }}'

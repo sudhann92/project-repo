@@ -1,0 +1,33 @@
+- hosts: docker
+  become: true
+  become_method: sudo
+  vars:
+    image_name: sudhan92/streamlit_new_image:8
+    docker_host_port: 8501
+    docker_container_port: 8501
+  tasks:
+    - name: start docker services
+      service:
+        name: "docker"
+      register: _service_output
+
+    - debug:
+        msg: '{{ _service_output.status.SubState }}'
+
+    - name: pull an image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        source: pull
+
+    - name: Run docker container
+      docker_container:
+        name: webserver
+        image: "{{ image_name }}"
+        interactive: yes
+        volumes: 
+        ports:
+          - "{{ docker_host_port }}:{{ docker_container_port }}"
+      register: _output_docker
+
+    - debug:
+         msg: '{{ _output_docker.container.State.Status }}'

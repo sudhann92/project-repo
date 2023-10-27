@@ -1,0 +1,8 @@
+[docker]
+#54.81.221.1
+172.31.41.28
+[docker:vars]
+ansible_connection=ssh
+ansible_ssh_user=ansible-user
+ansible_ssh_pass=ansible-user
+host_key_checking=false 
