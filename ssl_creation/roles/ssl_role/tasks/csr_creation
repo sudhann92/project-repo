@@ -1,0 +1,81 @@
+---
+- name: checking the variable value
+  assert:
+    that:
+      - csr_create_unique_name =! ''|default('' true)
+      - csr_create_cn =! ''| default('' true)
+    fail_msg: "Unique_name and Create_common name is the mandatory variable"
+    success_mg: " Varibale 'csr_create_unique_name' and 'csr_create_cn' passed value validation!"
+
+
+- name: Generate Private Key
+  openssl_privatekey:
+    path: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.key"
+    size: 2048
+  tags:
+    - csr_create_generate
+
+  
+  - name: Generate Certificate Signing Request
+  openssl_csr:
+    path: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.csr"
+    privatekey_path: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.key"
+    common_name: "{{ csr_create_cn }}"
+    #state: present
+    country_name: 'SG'
+    locality_name: 'Singapore'
+    state_or_province_name: 'SG'
+    organization_name: 'RHB Bank'
+    organizational_unit_name: 'IT'
+    subject_alt_name: 'DNS:{{ csr_create_alt_names  | default(csr_create_cn)}}'
+  register: _csr_create_gen
+  tags:
+    - csr_create_generate
+
+
+- name: Display generate CSR output
+  debug: var=_csr_create_gen
+  tags:
+    - csr_create_generate
+
+
+- name: Save CSR filename
+  set_fact:
+    csr_create_filename: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.csr"
+  tags:
+    - csr_create_filenamae
+
+- debug:
+    var: csr_create_filename
+  when: csr_create_debug|bool
+
+- name: Read the CSR content from the file
+  set_fact:
+    csr_create_csr: "{{ lookup('file', csr_create_filename) }}"
+  tags:
+    - csr_create_csr
+
+- debug: 
+    var: csr_create_csr
+  when: csr_create_debug|bool
+
+- name: Set stats and expose CSR
+  set_stats:
+    data:
+      csr: "{{ csr_create_csr }}"
+  tags:
+    - csr_create_set_stats
+
+- name: Remove private key
+  file:
+    path: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.key"
+    state: absent
+  tags:
+    - csr_create_cleanup
+
+- name: Remove the CSR file
+  file:
+    path: "{{ csr_create_stage_dir }}/{{ csr_create_unique_name }}.csr"
+    state: absent
+  tags:
+    - csr_create_cleanup
