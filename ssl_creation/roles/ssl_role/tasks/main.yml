@@ -1,0 +1,3 @@
+---
+# tasks file for ssl_role
+ - import_tasks: csr_creation.yml

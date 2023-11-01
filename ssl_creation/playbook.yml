@@ -1,0 +1,13 @@
+- name: Generate the CSR Creation
+  hosts: localhost
+  gather_facts: no
+  vars:
+     ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+
+  tasks:
+    - name: Calling SSL CSR creation Role
+      ansible.builtin.include_role:
+             name: ssl_role
+      
+    

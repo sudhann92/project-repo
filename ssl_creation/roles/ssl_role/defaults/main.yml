@@ -1,0 +1,5 @@
+---
+# defaults file for ssl_role
+csr_create_stage_dir: '/tmp'
+csr_create_debug: False
+
