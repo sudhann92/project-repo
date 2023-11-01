@@ -2,8 +2,8 @@
 - name: checking the variable value
   ansible.builtin.assert:
     that:
-      - csr_create_unique_name != ''
-      - csr_create_cn != ''
+      - csr_create_unique_name|default('', true) != ''
+      - csr_create_cn| default('', true) != '' 
     fail_msg: "Unique_name and Create_common name is the mandatory variable"
     success_msg: " Varibale 'csr_create_unique_name' and 'csr_create_cn' passed value validation!"
 
