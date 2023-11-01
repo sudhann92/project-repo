@@ -1,7 +1,7 @@
 Role Name
 =========
 
-[![ssl_role](https://github.com/sudhann92/project-repo/tree/new_branch/ssl_creation/roles/ssl_role)]
+[[ssl_role](https://github.com/sudhann92/project-repo/tree/new_branch/ssl_creation/roles/ssl_role)]
 
 Created the SSL role used to generate the CSR creation automatically
 
@@ -36,7 +36,7 @@ crypto collection
 License
 -------
 
-[!Sudhan]
+[**Sudhan**]
 
 Author Information
 ------------------
