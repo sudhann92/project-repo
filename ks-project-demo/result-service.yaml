@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-service
+spec:
+  type: NodePort
+  ports:
+    - port: 5001
+      targetPort: 80
+      nodePort: 31001
+  selector:
+        name: result-deployment-pod
+        app: demo-vote-application
+     
