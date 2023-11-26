@@ -20,7 +20,7 @@ spec:
          app: demo-vote-application
     spec:
       containers:
-         - name: db app
+         - name: db-app
            image: postgres:9.4
            env: POSTGRES_HOST_AUTH_METHOD=trust
            ports:

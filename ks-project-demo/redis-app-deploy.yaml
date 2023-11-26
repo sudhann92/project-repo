@@ -20,7 +20,7 @@ spec:
          app: demo-vote-application
     spec:
       containers:
-         - name: redis app
+         - name: redis-app
            image: redis:alpine
            ports:
              - containerPort: 6379
