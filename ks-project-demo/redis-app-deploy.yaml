@@ -27,4 +27,9 @@ spec:
            volumeMounts:
              - name: redis-data
                mountPath: /data
+
+      volumes:
+         - name: redis-data
+           emptyDir:
+             sizeLimit: 500Mi
             
