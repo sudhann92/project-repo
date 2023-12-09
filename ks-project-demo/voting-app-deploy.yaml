@@ -20,7 +20,7 @@ spec:
          app: demo-vote-application
     spec:
       containers:
-         - name: voting app
+         - name: voting-app
            image: kodekloud/examplevotingapp_vote:before
            ports:
              - containerPort: 80

@@ -1,0 +1,444 @@
+kubectl run redis --image=redis --namespace=finance --dry-run=client -o yaml > pod-finanace.yaml
+kubectl get pods --all-namespaces
+
+While you would be working mostly the declarative way - using definition files, imperative commands can help in getting one-time tasks done quickly, as well as generate a definition template easily. This would help save a considerable amount of time during your exams.
+
+Before we begin, familiarize yourself with the two options that can come in handy while working with the below commands:
+
+--dry-run: By default, as soon as the command is run, the resource will be created. If you simply want to test your command, use the --dry-run=client option. This will not create the resource. Instead, tell you whether the resource can be created and if your command is right.
+
+-o yaml: This will output the resource definition in YAML format on the screen.
+
+
+
+Use the above two in combination along with Linux output redirection to generate a resource definition file quickly, that you can then modify and create resources as required, instead of creating the files from scratch.
+
+
+
+kubectl run nginx --image=nginx --dry-run=client -o yaml > nginx-pod.yaml
+
+
+
+POD
+Create an NGINX Pod
+
+kubectl run nginx --image=nginx
+
+
+
+Generate POD Manifest YAML file (-o yaml). Don't create it(--dry-run)
+
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+
+
+
+Deployment
+Create a deployment
+
+kubectl create deployment --image=nginx nginx
+
+
+
+Generate Deployment YAML file (-o yaml). Don't create it(--dry-run)
+
+kubectl create deployment --image=nginx nginx --dry-run -o yaml
+
+
+
+Generate Deployment with 4 Replicas
+
+kubectl create deployment nginx --image=nginx --replicas=4
+
+
+
+You can also scale deployment using the kubectl scale command.
+
+kubectl scale deployment nginx --replicas=4
+
+
+
+Another way to do this is to save the YAML definition to a file and modify
+
+kubectl create deployment nginx --image=nginx--dry-run=client -o yaml > nginx-deployment.yaml
+
+
+
+You can then update the YAML file with the replicas or any other field before creating the deployment.
+
+
+
+Service
+Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379
+
+kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml
+
+(This will automatically use the pod's labels as selectors)
+
+Or
+
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods' labels as selectors; instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+
+
+
+Create a Service named nginx of type NodePort to expose pod nginx's port 80 on port 30080 on the nodes:
+
+kubectl expose pod nginx --port=80 --name nginx-service --type=NodePort --dry-run=client -o yaml
+
+(This will automatically use the pod's labels as selectors, but you cannot specify the node port. You have to generate a definition file and then add the node port in manually before creating the service with the pod.)
+
+Or
+
+kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
+
+(This will not use the pods' labels as selectors)
+
+Both the above commands have their own challenges. While one of it cannot accept a selector the other cannot accept a node port. I would recommend going with the `kubectl expose` command. If you need to specify a node port, generate a definition file using the same command and manually input the nodeport before creating the service.
+
+
+
+kubectl run nginx-pod --image=nginx:alpine
+
+
+kubectl run redis --image=redis:alpine --dry-run=client -o yaml > pod.yaml
+
+controlplane ~ ➜  vi pod.yaml 
+
+controlplane ~ ➜  kubectl create -f pod.yaml 
+
+Cluster IP 
+kubectl expose pod redis --port=6379 --name redis-service
+
+Create depolyment in command
+kubectl create deployment --image=kodekloud/webapp-color webapp --replicas=3
+
+create pod and expose port in 8080
+kubectl run custom-nginx --image=nginx --port=8080
+
+create namespace
+kubectl create namespace dev-ns
+
+create new deployment in dev-ns namespace
+kubectl create deployment redis-deploy --namespace dev-ns --image=redis --replicas=2
+deployment.apps/redis-deploy created
+
+
+Create a pod called httpd using the image httpd:alpine in the default namespace. 
+Next, create a service of type ClusterIP by the same name (httpd). The target port for the service should be 80
+controlplane ~ ➜  kubectl run httpd --image=httpd:alpine --port=80 --expose
+service/httpd created
+pod/httpd created
+
+
+A copy of the file with your changes is saved in a temporary location as shown above.
+
+You can then delete the existing pod by running the command:
+
+kubectl delete pod webapp
+
+
+
+Then create a new pod with your changes using the temporary file
+
+kubectl create -f /tmp/kubectl-edit-ccvrq.yaml
+
+
+
+2. The second option is to extract the pod definition in YAML format to a file using the command
+
+kubectl get pod webapp -o yaml > my-new-pod.yaml
+
+Then make the changes to the exported file using an editor (vi editor). Save the changes
+
+vi my-new-pod.yaml
+
+Then delete the existing pod
+
+kubectl delete pod webapp
+
+Then create a new pod with the edited file
+
+kubectl create -f my-new-pod.yaml
+
+
+
+Edit Deployments
+With Deployments you can easily edit any field/property of the POD template. Since the pod template is a child of the deployment specification,  with every change the deployment will automatically delete and create a new pod with the new changes. So if you are asked to edit a property of a POD part of a deployment you may do that simply by running the command
+
+kubectl edit deployment my-deployment
+
+
+
+---------------------------------
+ kubectl create secret generic db-secret \
+> --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+secret/db-secret created
+
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: "2023-12-04T08:19:40Z"
+  name: db-secret
+  namespace: default
+  resourceVersion: "1077"
+  uid: de447a8d-4800-48cf-b1f1-0ec0b1de2eee
+data:
+  DB_Host: c3FsMDE=
+  DB_Password: cGFzc3dvcmQxMjM=
+  DB_User: cm9vdA==
+type: Opaque
+
+
+========================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-12-04T08:06:24Z"
+  labels:
+    name: webapp-pod
+  name: webapp-pod
+  namespace: default
+  resourceVersion: "833"
+  uid: d605956d-af88-4a84-85c2-e0a4b4a0a138
+spec:
+  containers:
+  - image: kodekloud/simple-webapp-mysql
+    imagePullPolicy: Always
+    name: webapp
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    envFrom:
+     - secretRef:
+        name: db-secret
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-9qm4m
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: controlplane
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-9qm4m
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-12-04T08:06:24Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-12-04T08:06:34Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-12-04T08:06:34Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-12-04T08:06:24Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://8c5864f9845ad3d531ef20ba3370e51ac9d760fb97cda450a2a82a79cd5b0d07
+    image: docker.io/kodekloud/simple-webapp-mysql:latest
+    imageID: docker.io/kodekloud/simple-webapp-mysql@sha256:92943d2b3ea4a1db7c8a9529cd5786ae3b9999e0246ab665c29922e9800d1b41
+    lastState: {}
+    name: webapp
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-12-04T08:06:33Z"
+  hostIP: 192.13.38.6
+  phase: Running
+  podIP: 10.42.0.9
+  podIPs:
+  - ip: 10.42.0.9
+  qosClass: BestEffort
+  startTime: "2023-12-04T08:06:24Z"
+
+  ==================
+      1  kubectl get serviceaccounts 
+    2* kubectl describ
+    3  kubectl get serviceaccounts 
+    4  kubectl get serviceaccounts default 
+    5  kubectl describe serviceaccounts default 
+    6  kubectl get pods
+    7  kubectl describe pods web-dashboard-97c9c59f6-6pvb8 | grep -i image
+    8  kubectl  get pods web-dashboard-97c9c59f6-6pvb8 -o yaml > pod-web.yaml
+    9  vi pod-web.yaml 
+   10  kubectl create serviceaccount dashboard-sa
+   11  ls -ll /var/rbac
+   12  vi /var/rbac/dashboard-sa-role-binding.yaml 
+   13  kubectl create token dashboard-sa 
+   14  vi pod-web.yaml 
+   15  kubectl edit deployments web-dashboard 
+   16  kubectl --help
+   17  kubectl edit pods web-dashboard-598c6cb6d-bbfsz 
+   18  history
+
+   ==================================
+resources
+-------------
+limitation 
+request value for pods
+   controlplane ~ ➜  history
+    1  kubectl get pods
+    2  kubectl --help
+    3  kubectl describe pods  rabbit 
+    4  cat /proc/cpuinfo 
+    5  kubectl delete pod rabbit 
+    6  k get pods
+    7  k get pods
+    8  kubectl describe pod elephant 
+    9  kubectl get pods elephant -o yaml > elphant.yaml
+   10  vi elphant.yaml 
+   11  kubectl replace --force -f elphant.yaml 
+   12  k get  pods
+   13  k delete pd
+   14  k delete pod elephant
+   15  k get  pods
+   16  history
+
+============================
+Tain and tolerations:
+---------------------
+kubectl get nodes
+kubectl describe node node01 | grep -i taint
+kubectl taint node node01 spray=mortein:NoSchedule --> creating taint in node01 
+kubectl run mosquitio --image=nginx
+kubectl describe pod mosquito 
+controlplane ~ ➜  history
+    1  kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+    2  k get pods
+    3  k get pod -o wide
+    4  history
+
+--------------------------
+
+Node selector and Node Affinity
+
+controlplane ~ ➜  history
+    1  k get nodes node01 -o wide
+    2  k describe nodes node01 
+    3  k describe nodes node01  | grep -i label
+    4  k describe nodes node01 
+    5  k edit node node01 
+    6  kubectl --help
+    7  kubectl label --help
+    8  kubectl label node node01 color=blue
+    9  k edit node node01 
+   10  k run --help
+   11  kubectl create deployment --help
+   12  kubectl create deployment blue --image=nginx --replicas=3
+   13  kubectl get deployments
+   14  kubectl get pods -o wide
+   15  kubectl get deployments -o wide > deploy.yaml
+   16  vi deploy.yaml 
+   17  kubectl edit deployment blue
+   18  kubectl get pods -o wide
+   19  history
+   24  kubectl create deployment red --image=nginx --replicas=2 --dry-run=client -o yaml > dep.yaml
+   25  vi dep.yaml 
+   26  cat dep.yaml 
+   27  kubectl create deployment -f dep.yaml 
+   28  kubectl create -f dep.yaml 
+   29  kubectl get deploy
+   30  kubectl get pods -o wide
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: red
+  name: red
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: red
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: red
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+status: {}
+
+=-------------------------------------------------
+https://github.com/lucassha/CKAD-resources/tree/master
+https://www.linkedin.com/pulse/my-ckad-exam-experience-atharva-chauthaiwale/
+
+
+-------------------------
+multi pods
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: yellow
+  name: yellow
+spec:
+  containers:
+  - image: busybox
+    name: lemon
+    command: ["sleep", "1000"]
+    resources: {}
+  - image: redis 
+    name: gold
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+kubectl exec -i -t my-pod --container main-app -- /bin/bash
