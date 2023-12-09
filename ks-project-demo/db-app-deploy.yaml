@@ -22,9 +22,15 @@ spec:
       containers:
          - name: db-app
            image: postgres:9.4
-           env: POSTGRES_HOST_AUTH_METHOD=trust
+           env:
+           - name: POSTGRES_HOST_AUTH_METHOD
+             value: "trust"
            ports:
              - containerPort: 6379
            volumeMounts:
              - name: db-data
-               mountPath: /var/lib/postgresql/data        
+               mountPath: /var/lib/postgresql/data
+      volumes:
+         - name: db-data
+           emptyDir:
+             sizeLimit: 500Mi

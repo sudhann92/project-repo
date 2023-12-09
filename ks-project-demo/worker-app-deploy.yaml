@@ -14,11 +14,11 @@ spec:
 
   template:
     metadata:
-      name: vworker-deployment
+      name: worker-deployment
       labels:
          name: worker-deployment
          app: demo-vote-application
     spec:
       containers:
-         - name: voting app
+         - name: voting-app
            image: kodekloud/examplevotingapp_worker
