@@ -442,3 +442,37 @@ spec:
 status: {}
 
 kubectl exec -i -t my-pod --container main-app -- /bin/bash
+
+-----------------------------
+
+init container
+1  k get pods
+    2  k describe pods green | grep -i init
+    3  k describe pods red | grep -i init
+    4  k describe pods blue | grep -i init
+    5  k describe pods blue | grep -i image
+    6  k describe pods blue
+    7  k get pod blue
+    8  k describe pods blue
+    9  k describe pods blue | grep -i state
+   10  k describe pods purple | grep -i state
+   11  k describe pods purple | grep -i init
+   12  k describe pods purple | grep -i init
+   13  k get pod purp
+   14  k describe pods purple | grep -i state
+   15  k get pods
+   16  k edit pod purple 
+   17  k get pod red -o yaml 
+   18  k get pod red -o yaml > red.yaml
+   19  vi red.yaml 
+   20  k apply --force -f red.yaml 
+   25  k get pods --help
+   26  k logs pods orange
+   27  k logs pod orange
+   28  k --help
+   29  k describe pod orange 
+   30  k edit pods orange 
+   31  k replace --force -f /tmp/kubectl-edit-2855754534.yaml 
+   32  k get pods
+   33  k get pods
+   34  history
