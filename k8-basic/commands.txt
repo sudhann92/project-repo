@@ -476,3 +476,113 @@ init container
    32  k get pods
    33  k get pods
    34  history
+
+----------------------------------------
+
+readiness probe and livereadiness probe
+
+ontrolplane ~ ➜  cat simple.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-12-10T11:09:37Z"
+  labels:
+    name: simple-webapp
+  name: simple-webapp-2
+  namespace: default
+  resourceVersion: "867"
+  uid: 2b937af0-80ff-43c5-a101-140fae821b6f
+spec:
+  containers:
+  - env:
+    - name: APP_START_DELAY
+      value: "80"
+    image: kodekloud/webapp-delayed-start
+    imagePullPolicy: Always
+    name: simple-webapp
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-d2nl8
+      readOnly: true
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+    livenessProbe:
+      httpGet:
+        path: /live
+        port: 8080
+      periodSeconds: 1
+      initialDelaySeconds: 80
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: controlplane
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-d2nl8
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+
+for i in {1..20}; do
+   kubectl exec --namespace=kube-public curl -- sh -c 'test=`wget -qO- -T 2  http://webapp-service.default.svc.cluster.local:8080/ready 2>&1` && echo "$test OK" || echo "Failed"';
+   echo ""
+done
+
+--------
+
+logs and monitoring
+
+   1  k get pods
+    2  k logs -f webapp-1 
+    3  k get pods
+    4  k logs -f webapp-2
+    5  k describe pods webapp-2 
+    6  k logs -f webapp-2 -c simple-webapp
+
+    3  ls -ll
+    4  cd kubernetes-metrics-server/
+    5  ls -ll
+    6  kubectl create -f .
+    7  k get pods
+    8  k get depoly
+    9  k get deploy
+   10  kubectl top node
+   11  kubectl top pods
+   12  kubectl top node
