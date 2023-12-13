@@ -76,7 +76,8 @@ kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o ya
 
 Or
 
-kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods' labels as selectors; instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods' labels as selectors; instead it will assume selectors as app=redis. You cannot pass in selectors as an option. 
+So it does not work well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
 
 
 
@@ -293,6 +294,8 @@ status:
   startTime: "2023-12-04T08:06:24Z"
 
   ==================
+  Service account creationT
+
       1  kubectl get serviceaccounts 
     2* kubectl describ
     3  kubectl get serviceaccounts 
@@ -586,3 +589,292 @@ logs and monitoring
    10  kubectl top node
    11  kubectl top pods
    12  kubectl top node
+
+------------------------
+Check the label, selector,annotations
+
+   1  kubectl version --show
+    2  kubectl version 
+    3  kubectl version --help
+    4  kubectl version --short
+   12  k get pods -l env=dev | grep -iv 'Name' | wc -l
+   13  k get pods -l bu=finance | grep -iv 'Name' | wc -l
+   18  k get pods all -l env=prod,bu=finance,tier=frontend
+   19  k get pods -l env=prod,bu=finance,tier=frontend
+   20  k edit pods app-1-zzxdf
+   21  vi replicaset-definition-1.yaml 
+   22  vi replicaset-definition-1.yaml 
+   23  k get replica
+   24  k get replicasets.apps 
+   25  k create -f replicaset-definition-1.yaml 
+   26  k get replicasets.apps 
+   32  k get replicasets.apps --show-label
+   38  k get rs -o wide
+   39  history
+   40  history
+
+------------------------
+
+rolling update and recreate strategy
+
+   1  k get deploy
+    2  k get pods
+    3  k get all
+    4  cat curl-
+    5  cat curl-test.sh 
+    6  ./curl-test.sh 
+    7  k get pods
+    8  kubectl describe deployment | grep -i replicas
+    9  kubectl describe deployment | grep -i images
+   10  kubectl describe deployment | grep -i image
+   11  kubectl describe deployment | grep -i strategy
+   12  k get deployments.apps 
+   13  k edit deployment frontend
+   14  ls -ll
+   15  k get deployments.apps frontend  -o yaml > dep.yaml
+   16  vi dep.yaml 
+   17  k apply -f dep.yaml 
+   18  k get pods
+   19  k rollout status deployment frontend 
+   20  k get pods
+   21  k rollout status deployment frontend 
+   22  k rollout  history deployment frontend 
+   28  vi dep.yaml 
+   29  k apply -f dep.yaml 
+   30  vi dep.yaml 
+   31  k get deployments.apps frontend  -o yaml > dep.yaml
+   32  vi dep.yaml 
+   33  k apply -f dep.yaml 
+   34  vi dep.yaml 
+   35  k apply -f dep.yaml 
+   36  k rollout status deployment frontend 
+   37  k get pods
+   38  k describe deployments.apps frontend 
+   39  k edit deployments.apps frontend 
+   40  k get pods
+   41  k get pods
+   42  ./curl-test.sh 
+   43  ./curl-test.sh 
+   44  k get pods
+   45  history
+   46 k rollout undo deployment frontend --to-revision=2 
+
+   ------------------------
+   canary deployment
+
+      1  k get pods
+    2  k get all
+    3  k describe deployments.apps frontend | grep -i strategy
+    4* kubectl describe svc frontend
+    6  k get deployments.apps 
+    7  k get svc
+    8  k edit svc frontend-service 
+    9  k edit deployments.apps frontend-v2 
+   10  k get pods
+   11  k edit deployments.apps frontend-v2 
+   12  k get pods
+   13  k edit deploy frontend
+   14  k edit deploy frontend-v2 
+   15  k get pods
+   16  k get deploy
+   17  k delete deploy frontend
+   18  k get deploy
+       k scale depoly --replicas=1 <depolymnet name>
+   19  history
+
+------------------------------
+job and cron 
+
+controlplane ~ ➜  cat throw-dice-pod-cron.yaml 
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: throw-dice-cron-job
+spec:
+  schedule: "30 21 * * *"
+  jobTemplate:
+    spec:
+      completions: 3
+      parallelism: 3
+      backoffLimit: 25
+      template:
+        spec:
+          containers:
+          - name: throw-dice
+            image: kodekloud/throw-dice
+          restartPolicy: Never
+------------
+controlplane ~ ➜  cat job-pod.yaml 
+apiVersion: batch/v1
+kind: Job
+metadata: 
+   name: throw-dice-job
+
+
+spec:
+  backofflimit: 15
+  templates:
+    spec:
+      containers:
+        - name: throw-dice
+          image: kodekloud/throw-dice
+        restartPolicy: Never
+
+  1  vi throw-dice-pod.yaml 
+    2  k create -f throw-dice-pod.yaml 
+    3  k get pos
+    4  k get po
+    5  k describe pods  throw-dice-pod 
+    6  k logs throw-dice-pod 
+    7  k logs pods throw-dice-pod 
+    8  k logs pod throw-dice-pod 
+    9  k logs throw-dice-pod 
+   10  vi job-pod.yaml
+   11  cat job-pod.yaml 
+   12  k create -f job-pod.yaml 
+   13  vi job-pod.yaml 
+   14  k create -f job-pod.yaml 
+   15  vi job-pod.yaml 
+   16  k create -f job-pod.yaml 
+   17  vi job-pod.yaml 
+   18  k create -f job-pod.yaml 
+   19  k get pods
+   20  k logs throw-dice-pod 
+   21  k get pods
+   22  k logs throw-dice-job-hq8sk
+   23  k describe jobs.batch throw-dice-job-hq8sk
+   24  k describe pods throw-dice-job-hq8sk
+   25  k get jobs
+   26  k describe job throw-dice-job 
+   27  vi job-pod.yaml 
+   28  k delete jobs throw-dice-job 
+   29  k create -f job-pod.yaml 
+   30  k get pods
+   31  watch k get pods
+   32  watch kubectl get pods
+   33  k describe jobs.batch throw-dice-job 
+   34  vi job-pod.yaml 
+   35  k delete jobs.batch throw-dice-job 
+   36  k create -f job-pod.yaml 
+   37  vi job-pod.yaml 
+   38  k create -f job-pod.yaml 
+   39  watch kubectl get pods
+   40  vi throw-dice-pod-cron.yaml
+   41  k create -f throw-dice-pod-cron.yaml 
+   47  k create -f throw-dice-pod-cron.yaml 
+   49  k get cronjobs.batch throw-dice-cron-job 
+   50  cat throw-dice-pod-cron.yaml 
+   51  history
+
+   -------------------------
+   service detailed
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  selector:
+    name: simple-webapp
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2023-12-12T02:56:28Z"
+  labels:
+    component: apiserver
+    provider: kubernetes
+  name: kubernetes
+  namespace: default
+  resourceVersion: "191"
+  uid: 5d4b6917-77e3-4667-9d73-0fbb83393013
+spec:
+  clusterIP: 10.43.0.1
+  clusterIPs:
+  - 10.43.0.1
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 6443
+  sessionAffinity: None
+  type: 
+  
+------------------------------------------
+Ingress object
+
+controlplane ~ ➜  cat ingress-pay-def.yaml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: critical-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path:  /pay
+        pathType: Prefix
+        backend:
+          service:
+            name: pay-service
+            port:
+              number: 8282
+
+
+1  k get --all-namespaces 
+    2  k get all --all-namespaces 
+    3  k get ns
+    4  k get namespace
+    5  k describe deployments.apps deployment.apps/ingress-nginx-controller
+    6  k describe deploy deployment.apps/ingress-nginx-controller
+    7  k describe deploy ingress-nginx-controller
+    8  kubectl get all -A
+    9  kubectl get all
+   10  k get ns app-space
+   11  k get deploy -ns app-space
+   12  k get deploy --namespace app-space
+   13  k get ingress
+   14  k get --help
+   15  kubectl get ingress --all-namespaces
+   16  k get ingress
+   17  k get ingress --A
+   18  k get ingress -A
+   19* k g
+   20  k get ingress --A
+   21  k get ingress -A
+   22  k describe ingress ingress-wear-watch
+   23  k describe ingress
+   24  k describe ingress -A
+   25  ls -ll
+   26  k edit ingress --namespace=app-space ingress-wear-watch
+   27  k get ingress --namespace=app-space ingress-wear-watch 
+   28  k describe ingress --namespace=app-space ingress-wear-watch 
+   29  k get ingress
+   30  k get ingress -A
+   31  k get all -A
+   33  k edit ingress --namespace=app-space ingress-wear-watch
+   34  k get namespaces
+   35  k get -A
+   36  k get all -A
+   37  k get svc -n critical-space 
+   38  k get svc -A
+   39  vi ingress-pay-def.yaml
+   40  k create -f ingress-pay-def.yaml 
+   41  k get ingress -A
+   42  k describe ingress -n critical-space test-ingress 
+   43  ls -ll
+   44  cat ingress-pay-def.yaml 
+   45  history
