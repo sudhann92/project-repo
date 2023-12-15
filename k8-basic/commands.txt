@@ -1002,3 +1002,47 @@ spec:
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
   type: NodePort
+
+---------------------
+Network polices
+
+ontrolplane ~ ➜  cat network-policy.yaml 
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      name: internal
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+      - podSelector:
+          matchLabels:
+            name: mysql
+      ports:
+        - protocol: TCP
+          port: 3306
+
+    - to:
+      - podSelector:
+          matchLabels:
+            name: payroll
+      ports:
+        - protocol: TCP
+          port: 8080
+
+
+    1  k get networkpoliy
+    2  k get networkpolicies.networking.k8s.io 
+    3  k describe networkpolicies.networking.k8s.io payroll-policy 
+    4  k get pods
+    5  k get svc
+    6  vi network-policy.yaml
+    7  cat network-policy.yaml 
+    8  k create -f  network-policy.yaml 
+    9  k get networkpolicies.networking.k8s.io 
+   10  k describe networkpolicies.networking.k8s.io internal-policy
