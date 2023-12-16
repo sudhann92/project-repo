@@ -1045,4 +1045,124 @@ spec:
     7  cat network-policy.yaml 
     8  k create -f  network-policy.yaml 
     9  k get networkpolicies.networking.k8s.io 
-   10  k describe networkpolicies.networking.k8s.io internal-policy
+   10  k describe networkpolicies.networking.k8s.io internal-
+   
+   --------------------
+   pv and pvc 
+
+   1  ls -ll
+    2  vi webap.yaml 
+    3  k replace --force -f webap.yaml 
+    4  vi webap.yaml 
+    5  k get pvc
+    6  k replace --force -f webap.yaml 
+    7  k get pvc
+    8  vi webap.yaml 
+    9  k replace --force -f webap.yaml 
+   10  vi webap.yaml 
+   11  k replace --force -f webap.yaml 
+   12  k get pvc
+   13  ls -ll /pv/log/
+   14  du -sh /pv/log/
+   15  k delete pvc claim-log-1 
+   16  k get pvc
+   17  k get pv
+   18  history
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-12-15T05:59:28Z"
+  name: webapp
+  namespace: default
+  resourceVersion: "601"
+  uid: 65718951-1e9f-4dfb-8fd7-7c4e6c606291
+spec:
+  containers:
+  - env:
+    - name: LOG_HANDLERS
+      value: file
+    image: kodekloud/event-simulator
+    imagePullPolicy: Always
+    name: event-simulator
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /log
+      name: log-volume
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-r2zjg
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: controlplane
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      # directory location on host
+      claimName: claim-log-1
+  - name: kube-api-access-r2zjg
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+
+
+controlplane /pv/log ➜  cat presistent-claim.yaml 
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: claim-log-1
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Mi          
+
+
+controlplane /pv/log ➜  cat presitent-volume-creation.yaml 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-log
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /pv/log
