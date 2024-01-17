@@ -255,43 +255,6 @@ spec:
               apiVersion: v1
               fieldPath: metadata.namespace
             path: namespace
-status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: "2023-12-04T08:06:24Z"
-    status: "True"
-    type: Initialized
-  - lastProbeTime: null
-    lastTransitionTime: "2023-12-04T08:06:34Z"
-    status: "True"
-    type: Ready
-  - lastProbeTime: null
-    lastTransitionTime: "2023-12-04T08:06:34Z"
-    status: "True"
-    type: ContainersReady
-  - lastProbeTime: null
-    lastTransitionTime: "2023-12-04T08:06:24Z"
-    status: "True"
-    type: PodScheduled
-  containerStatuses:
-  - containerID: containerd://8c5864f9845ad3d531ef20ba3370e51ac9d760fb97cda450a2a82a79cd5b0d07
-    image: docker.io/kodekloud/simple-webapp-mysql:latest
-    imageID: docker.io/kodekloud/simple-webapp-mysql@sha256:92943d2b3ea4a1db7c8a9529cd5786ae3b9999e0246ab665c29922e9800d1b41
-    lastState: {}
-    name: webapp
-    ready: true
-    restartCount: 0
-    started: true
-    state:
-      running:
-        startedAt: "2023-12-04T08:06:33Z"
-  hostIP: 192.13.38.6
-  phase: Running
-  podIP: 10.42.0.9
-  podIPs:
-  - ip: 10.42.0.9
-  qosClass: BestEffort
-  startTime: "2023-12-04T08:06:24Z"
 
   ==================
   Service account creationT
@@ -1166,3 +1129,329 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /pv/log
+
+----------------------
+
+authorization
+
+    1  find . -type f -iname "config"
+    8  kubectl get node
+    9  kube-apiserver --help
+   10  kubectl get namesapce
+   11  kubectl get namespace
+   12  k get pods -n kube-system 
+   16  k describe pod kube-apiserver-controlplane -n kube-system | grep -i authorization
+   22  k get roles.rbac.authorization.k8s.io -A --no-headers | wc -l
+   23  kubectl describe role kube-proxy -n kube-system 
+   24  kubectl get rolebindings.rbac.authorization.k8s.io
+   25  kubectl get rolebindings.rbac.authorization.k8s.io -A
+   26  kubectl get rolebindings.rbac.authorization.k8s.io -A | grep -i proxy
+   27  kubectl describe rolebinding kube-proxy -n kube-system
+   28  kubectl auth can-i --help
+   29  kubectl auth can-i get pod --as dev-user
+   32  kubectl auth can-i get pod --as dev-user -n default
+   33  kubectl get pod --as dev-user
+   34  kubectl get pod --as dev-user -n default
+   36  k create role developer -o yaml > devloper.yaml
+   37  kubectl create role developer --namespace=default --verb=list,create,delete --resource=pod --dry-run=client -o yaml > devlop.yaml
+   40  kubectl create rolebinding dev-user-binding -n default --role=developer --user=dev-user --dry-run=client -o yaml > dev-role.yaml
+   42  k create -f devlop.yaml 
+   43  k create -f dev-role.yaml 
+   44  k get role
+   45  k get roles
+   46  k get rolebindings.rbac.authorization.k8s.io 
+   47  k describe rolebindings.rbac.authorization.k8s.io dev-user-binding 
+   53  k describe pod dark-blue-app -n blue --as dev-user
+   54  k get role -n blue
+   55  k get rolebindings.rbac.authorization.k8s.io -n blue
+   56  k describe rolebindings.rbac.authorization.k8s.io dev-user-binding -n blue
+   57  k describe role -n blue
+   58  k get pod dark-blue-app --as dev-user
+   59  k get pod dark-blue-app
+   60  k get pod dark-blue-app -n blue
+   61  k get pod dark-blue-app -n blue --as dev-user
+   62  k edit role developer -n blue 
+   63  k describe role -n blue
+   64  k get pod dark-blue-app -n blue --as dev-user
+   65  k get namespace
+   66  k edit role developer -n blue 
+   67  k get pod dark-blue-app -n blue --as dev-user
+   68  k edit role developer -n blue 
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: "2023-12-19T05:55:20Z"
+  name: developer
+  namespace: blue
+  resourceVersion: "5068"
+  uid: f653bae7-8b88-466e-9e6d-00020d00cd05
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - dark-blue-app  [pod name]
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+
+  =============================
+
+  cluster role based method
+
+     1  kubectl get nodes
+    2  kubectl get clusterrole
+    3  kubectl get clusterrolebindings.rbac.authorization.k8s.io 
+    4  kubectl get clusterrole --no-headers | wc -l
+    5  kubectl get clusterrolebindings.rbac.authorization.k8s.io --no-headers | wc -l
+    6  kubectl get namespaces 
+    7  kubectl get clusterrole cluster-admin 
+    8  kubectl describe clusterrole cluster-admin 
+    9  kubectl api-resources --namespaced=false
+   11  kubectl describe clusterrolebindings.rbac.authorization.k8s.io cluster-admin
+   12  kubectl create clusterrole --help
+   13  kubectl create clusterrole --verb=get,list,watch --resource=node --dry-run =client -o yaml > node-clusterrole.yaml
+   14  kubectl create clusterrole --verb=get,list,watch --resource=node --dry-run=client -o yaml > node-clusterrole.yaml
+   15  kubectl create clusterrole node-cluster-rule --verb=get,list,watch --resource=node --dry-run=client -o yaml > node-clusterrole.yaml
+   16  vi node-clusterrole.yaml 
+   17  kubectl auth can-i list nodes --as michelle
+   18  kubectl create clusterrole node-cluster-rule --verb=get,list,watch,update,delete --resource=node --dry-run=client -o yaml > node-clusterrole.yaml
+   21  kubectl create clusterrolebinding node-cluster-binding --clusterrole=node-cluster-rule --user=michelle --dry-run=client -o yaml > node-cluster-bind.yaml
+   22  vi node-cluster-bind.yaml 
+   23  k create -f node-clusterrole.yaml 
+   24  k create -f node-cluster-bind.yaml 
+   25  kubectl auth can-i list nodes --as michelle
+   26  vi node-clusterrole.yaml 
+   27  k edit clusterrole node-cluster-rule
+   28  k auth can-i list storageclass --as michelle
+   29  k auth can-i list pv --as michelle
+   30  k auth can-i list sc --as michelle
+   31  k edit clusterrole node-cluster-rule
+   32  vi node-clusterrole.yaml 
+   33  k create clusterrole storage-admin --verb=get,list,create,delete,watch --resource=persistentvolumes,storageclasses --dry-run=client -o yaml > storage-admin.yaml
+   37  k create clusterrolebinding michelle-storage-admin --clusterrole=storage-admin --user=michelle --dry-run=client -o yaml > storagebinding.yaml
+   38  vi storagebinding.yaml 
+
+controlplane ~ ➜  cat storage-admin.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: storage-admin
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - create
+  - delete
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - create
+  - delete
+  - watch
+
+
+  controlplane ~ ➜  cat storagebinding.yaml 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: michelle-storage-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: storage-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: michelle
+
+-----------------------------------------
+  Admission Controller
+
+controlplane ~ ➜  history
+    1  kubectl exec -it kube-apiserver-controlplane -n kube-system -- /bin/bash
+    2  kubectl exec -it kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep -i admission
+    3  kubectl exec -it kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep -i 'enable-admission-plugins'
+    4  kubectl exec -it kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep -i 'enable-admission-plugins'| grep -iw 'NamespaceAutoprovision'
+    5  vi /etc/kubernetes/manifests/kube-apiserver.yaml
+    6  kubectl run nginx --image nginx -n blue
+    7  k get pods
+    8  k get namespaces 
+    9  k get pods -n kube-system 
+   10  k edit kube-apiserver-controlplane -n kube-system 
+   11  k edit pod kube-apiserver-controlplane -n kube-system 
+   12  k replace --force -f /tmp/kubectl-edit-3529339972.yaml
+   13  k edit pod kube-apiserver-controlplane -n kube-system 
+   14  vi /etc/kubernetes/manifests/kube-apiserver.yaml
+   15  k get pods -n kube-system 
+   16  kubectl run nginx --image nginx -n blue
+   17  kubectl get namespace
+   18  k get pods -n blue 
+   19  vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   20  vi /etc/kubernetes/manifests/etcd.yaml 
+   21  k get pod -n kube-system
+   22  ps -ef | grep kube-apiserver | grep admission-plugins
+   23  ps -ef | grep kube-apiserver | grep disable-admission-plugins
+   24  history
+
+  ----------------
+  API versions
+
+  apis under lot of groups available for each API group ahave separate version 
+  V1 - GA global stable group
+  V1Alpha1
+  V1 Beta1
+
+ 1  kubectl api-resources 
+    2  kubectl api-resources | grep -iE "deploy|replicasets,cronjobs,customersourcedef"
+    3  kubectl api-resources | grep -iE "deploy|replicasets|cronjobs|customersourcedef"
+    4  kubectl api-resources | grep -iE "deploy|replicasets|cronjobs|customersour"
+    5  kubectl api-resources | grep -iE "deploy|replicasets|cronjobs|customresourcedefinitions"
+    6  kubectl version --short
+    7  kubectl explain deploy
+    8  kubectl explain job
+    9  kubectl explain authorization
+   10  kubectl proxy 8001&
+   11  curl localhost:8001/apis/authorization.k8s.io
+   12  curl localhost:8001/apis/rbac.authorization.k8s.io
+   13  vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   14  cp /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml-backup`date +%F`
+   15  vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   16  k get pods -n kube-system
+   17  k get pods
+   18  k get nodes
+   19  k get pods -n kube-system
+   20  curl localhost:8001/apis/rbac.authorization.k8s.io
+   21  kubectl get po -n kube-system
+   22  curl localhost:8001/apis/rbac.authorization.k8s.io
+   23  kubectl get po -n kube-system
+   24  curl localhost:8001/apis/rbac.authorization.k8s.io
+   25  curl localhost:8001/apis/rbac.authorization.k8s.io/v1alpha1
+   26  curl localhost:8001/apis/rbac.authorization.k8s.io/v1
+   27  curl localhost:8001/apis/rbac.authorization.k8s.io/v1alpha1
+   28  vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   29  ls -ll
+   30  sudo install -o root -g root -m 0755 kubectl-convert /usr/local/bin/kubectl-convert
+   31  kubectl-convert --version
+   32  vi ingress-old.yaml 
+   33  curl localhost:8001/apis/networking.k8s.io/v1
+   34  curl localhost:8001/apis/networking.k8s.io/
+   35  vi ingress-old.yaml 
+   36  kubectl-convert --help
+   37  kubectl convert -f ingress-old.yaml --outpu-version networking.k8s.io/v1 | kubectl create -f -
+   38  vi ingress-old.yaml 
+   39  kubectl convert -f ingress-old.yaml -o yaml
+   40  history
+
+-------------
+customer resource definition
+
+controlplane ~ ➜  history
+    1  ls -ll
+    2  vi crd.yaml 
+    3  k create -f  crd.yaml 
+    4  k describe customresourcedefinitions.apiextensions.k8s.io internals.datasets.kodekloud.com 
+    5  vi crd.yaml 
+    6  ls -ll
+    7  k create -f  custom.yaml 
+    8  vi crd.yaml 
+    9  vi custom.yaml 
+   10  k create -f  custom.yaml 
+   11  vi crd.yaml 
+   12  vi custom.yaml 
+   13  vi crd.yaml 
+   14  k apply --force -f crd.yaml 
+   15  k describe customresourcedefinitions.apiextensions.k8s.io internals.datasets.kodekloud.com 
+   16  k create -f  custom.yaml 
+   17  k describe customresourcedefinitions.apiextensions.k8s.io collectors.monitoring.controller 
+   18  vi datacenter.yaml
+   19  k create -f datacenter.yaml 
+   20  k describe customresourcedefinitions.apiextensions.k8s.io globals.traffic.controller 
+   21  k describe customresourcedefinitions.apiextensions.k8s.io globals.traffic.controller | grep -iA "short"
+   22  k describe customresourcedefinitions.apiextensions.k8s.io globals.traffic.controller | grep -iA2 "short"
+   23  history
+
+controlplane ~ ➜  cat crd.yaml 
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name:  internals.datasets.kodekloud.com
+spec:
+  group: datasets.kodekloud.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                internalLoad:
+                  type: string
+                range:
+                  type: integer
+                percentage:
+                  type: string
+  scope: Namespaced
+  names: 
+    plural: internals
+    singular: internal
+    kind: Internal
+    shortNames:
+    - int
+
+controlplane ~ ➜  cat custom.yaml 
+---
+kind: Internal
+apiVersion: datasets.kodekloud.com/v1
+metadata:
+  name: internal-space
+  namespace: default
+spec:
+  internalLoad: "high"
+  range: 80
+  percentage: "50"
+
+---------------------
+
+controlplane ~ ➜  history
+    1  cat /etc/os-release 
+    2  uname -ar
+    3  curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+    4  ls -ll
+    5  sudo apt-get install apt-transport-https --yes
+    6  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+    7  sudo apt-get update
+    8  sudo apt-get install helm
+    9  helm --help
+   14  helm --help | grep -i environment
+   15  helm env
+   16  helm version
+   17  helm --help | grep -i verbose
+   18  history

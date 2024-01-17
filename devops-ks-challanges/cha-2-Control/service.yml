@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2024-01-15T02:05:06Z"
+  labels:
+    run: gop-file-server
+  name: gop-fs-service
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 31200
+  selector:
+    run: gop-file-server
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
