@@ -1744,7 +1744,6 @@ We have deployed some pods in the namespaces ckad-alpha and ckad-beta.
 
 You need to create a NetworkPolicy named ns-netpol-ckad that will restrict all Pods in Namespace ckad-alpha to only have outgoing traffic to Pods in Namespace ckad-beta . Ingress traffic should not be affected.
 
-
 However, the NetworkPolicy you create should allow egress traffic on port 53 TCP and UDP.
 
 
@@ -1876,8 +1875,6 @@ A new payment service has been introduced. Since it is a sensitive application, 
 
 
 You are requested to make the new application available at /pay. Create an ingress resource named ingress-ckad09-svcn for the payment application to make it available at /pay
-
-
 
 Identify and implement the best approach to making this application available on the ingress controller and test to make sure its working. Look into annotations: rewrite-target as well.
 

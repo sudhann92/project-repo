@@ -83,7 +83,8 @@ def read_excel_file(file_value, filter_column_name, filter_column_value):
 
 #Iterate the file and read the content in excel and append the data in new variable in the form of list
     for file_full_path in file_value:        
-        try:        
+        try:
+            #print(file_full_path)        
             data_value.append(pd.read_excel(file_full_path))
         except PermissionError as ps:
              print(f'\n----- The {file_full_path} file has opened by some one.kindly close and retrigger the script again------- \n')
@@ -102,7 +103,7 @@ def read_excel_file(file_value, filter_column_name, filter_column_value):
     over_all_value_tower_column_value = len(tower_column_value)
     dublicate_data_removed = len(tower_column_exact_value)
     print('-'* 60)
-    print(f'overall_app_count: {over_all_value_tower_column_value} \
+    print(f'overall_{filter_column_value}_count: {over_all_value_tower_column_value} \
           \nTotal_dublicate_values in {filter_column_value} Tower: {over_all_value_tower_column_value - dublicate_data_removed} \
           \nAfter_removed_duplicate_data_value_count: {dublicate_data_removed}')
     print('-'* 60)
@@ -115,12 +116,12 @@ def read_excel_file(file_value, filter_column_name, filter_column_value):
 
 #use the regex sub to replace the [\\!&/<>?] value with "_" in PIC value used for excel file name input          
         excel_file_name = re.sub(r"[\\!&/<>?]", "_" , unique_single_value)
-        output_path = f"{output_folder_path}\\{excel_file_name}.xlsx"
+        output_path = f"{output_folder_path}\\{excel_file_name}_{filter_column_value}.xlsx"
 
 #used try and except for error handling                 
         try:
 #Match the two condition when column PIC == unique PIC value and column 'Tower' should be Apps store the variable in data_value_output      
-            data_value_output = Combine_data_value[(Combine_data_value[column_name_pic] == unique_single_value) & (Combine_data_value[filter_column_name] == filter_column_value)] #.str.fullmatch(unique_single_value, na=False)]
+            data_value_output = tower_column_exact_value[(tower_column_exact_value[column_name_pic] == unique_single_value) & (tower_column_exact_value[filter_column_name] == filter_column_value)] #.str.fullmatch(unique_single_value, na=False)]
 
  #index used for row value in pivot and for column we used column variable aggfun used to count,sum,mean the column values
  #rename function used to change the column name in pivot table
@@ -159,6 +160,8 @@ def main():
     user_file = input("\nEnter the file name with wildcard(*) to be extracted:").strip()
     file = list(path.rglob(user_file))
     column_tower_value = str(input("\nEnter any one option [Apps/DB/Infra/Network/Security] case sensitive:")).strip()
+    #global output_destination_path
+    #output_destination_path = str(input("\nEnter the destination folder path to download the new excel file:")).strip()
     while column_tower_value not in ['Apps','DB','Infra','Network','Security']:
             print('\nPlease enter proper option with case sensitive string\n')
             print('----------------------------------------------------------\n')
