@@ -1,0 +1,44 @@
+---
+- hosts: all
+  gather_facts: true
+  become: yes
+  tasks:
+    - name: blockline to create and wirte content in file
+      ansible.builtin.blockinfile:
+        path: /root/facts.txt 
+        block: |
+            Ansible managed node architecture is {{ ansible_architecture }}
+        create: true
+    
+    - name: check the whether file available for or not
+      shell:
+       cmd: 'ls -ll /root/facts.txt'
+      register: file_value
+    
+    - debug:
+        msg: '{{ file_value.stdout_lines }}'
+
+    - name: install the httpd in all app servers
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+
+    - name: copy the file from remote location to other location
+      ansible.builtin.copy:
+          src: /root/facts.txt
+          dest: /var/www/html/index.html
+          remote_src: yes
+
+    - name: start the services
+      ansible.builtin.service:
+         name: httpd
+         state: started
+
+    - name: use the shell module
+      shell: 
+        cmd: "curl http://{{ inventory_hostname }}"
+      register: _output
+
+    - name: print the message
+      debug:
+       msg: '{{ _output.stdout_lines }}'

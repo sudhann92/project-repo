@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+   - name: replace app01 server
+     ansible.builtin.replace:
+       path: /opt/data/blog.txt
+       regexp: 'xFusionCorp'
+       replace: 'Nautilus'
+     when: inventory_hostname == 'stapp01'
+
+   - name: replace app02 server
+     ansible.builtin.replace:
+       path: /opt/data/story.txt
+       regexp: 'Nautilus'
+       replace: 'KodeKloud'
+     when: inventory_hostname == 'stapp02'
+
+   - name: replace app03 server
+     ansible.builtin.replace:
+       path: /opt/data/media.txt
+       regexp: 'KodeKloud'
+       replace: 'xFusionCorp Industries'
+     when: inventory_hostname == 'stapp03'
