@@ -1,0 +1,49 @@
+
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag
+
+docker exec mysql-db mysql -pdb_pass123 -e 'use foo; select * from myTable'
+
+##Mount the directory from the host to container
+docker run -v /opt/data:/var/lib/mysql -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+#container orchestration
+docker service create --replicas=100 nodjs
+
+#swarm manager
+In swarm manager node need ti initilaize the swarm by using below command
+docker swarm init
+
+#Nodeworker
+Once swarm manager initilaize need to join the worked server with swarm manager
+docker swarm join --token <token>
+
+#docker service command as similar like docker run command
+docker service creare --replicas=3 -p 8080:80 --network <network name> <image name>
+
+
+####Kubernetes##########
+Kubernetes can easily autoscale lot of containers
+
+kubectl run --replicas=1000 my-web-server
+kubectl scale --replicas=2000 my-web-server
+kubectl rolling-update my-web-server --image=nw-web-server2
+kubectl rolling-update my-web-server --rollback
+
+kub cluster constits of set of nodes
+
+Node is the machine is VM the Kub software installed 
+Node is the worker machine
+
+cluster is collection of nodes
+Master is the node have kub controller plane installed , Master node hava resposnibility to take care of cluster nodes
+monitoring the service ,information about the child node details in master node
+
+during Kubernetes installed below are components get installled
+1) API server --> (CLI,API)
+2) etecd --> used to manage the cluster (store all info in this file location)
+3) kubelet --> agent run each node in cluster
+4) container Runtime --> undelying software like docker 
+5) controller -->(responding the node and container down )
+6) scheduler
+
+kubectl --> CLI in cluster
