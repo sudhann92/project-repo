@@ -1,0 +1,6 @@
+---
+# handlers file for /home/thor/ansible/role/http
+- name: Restart apache
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
