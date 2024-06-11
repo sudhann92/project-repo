@@ -6,13 +6,8 @@
 
 
   tasks:
-    - debug:
-       msg: 
-         #- '{{ inventory_file }}'
-         #- '{{ inventory_dir }}'
-         - '{{ playbook_dir }}'
-    #- name: Calling SSL CSR creation Role
-     # ansible.builtin.include_role:
-     #        name: ssl_role
+    - name: Calling SSL CSR creation Role
+      ansible.builtin.include_role:
+             name: ssl_role
       
     
