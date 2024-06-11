@@ -8,7 +8,7 @@
   tasks:
     - debug:
        msg: 
-         - '{{ inventory_file }}'
+         #- '{{ inventory_file }}'
          - '{{ inventory_dir }}'
          - '{{ playbook_dir }}'
     #- name: Calling SSL CSR creation Role
