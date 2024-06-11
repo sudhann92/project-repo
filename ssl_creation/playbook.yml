@@ -9,7 +9,7 @@
     - debug:
        msg: 
          #- '{{ inventory_file }}'
-         - '{{ inventory_dir }}'
+         #- '{{ inventory_dir }}'
          - '{{ playbook_dir }}'
     #- name: Calling SSL CSR creation Role
      # ansible.builtin.include_role:
