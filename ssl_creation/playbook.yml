@@ -6,8 +6,10 @@
 
 
   tasks:
-    - name: Calling SSL CSR creation Role
-      ansible.builtin.include_role:
-             name: ssl_role
+    - debug:
+       msg: '{{ tower_job_id }}
+    #- name: Calling SSL CSR creation Role
+     # ansible.builtin.include_role:
+     #        name: ssl_role
       
     
