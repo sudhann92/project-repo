@@ -105,19 +105,19 @@ def run_date_module():
     #Based on date value input convert the value to desired format
     #imported the parse library from dateutils and imported re for search and replace value
     def result_val():
-    result['changed'] = True
-    result['original_message'] = date_value_var
-    result['converted_format'] = convert_val
-    result['message'] = 'Given Date Format has converted as desired Format'
+        result['changed'] = True
+        result['original_message'] = date_value_var
+        result['converted_format'] = convert_val
+        result['message'] = 'Given Date Format has converted as desired Format'
 
     if module.params['date_value'] is not None:
-        date_value_var = module.params['date_value']
+        date_value_var = module.params['date_value'].strip()
         pattern_val = '^([0-9]{4})-([0-9][1-9]|1[0-2])-([0-9]{2})$'
         replace_val = date_value_var.replace("/", "-").replace("_", "-").replace(".", "-")
         
         if re.search(pattern_val, replace_val):
             date_val = parse(replace_val, yearfirst=True)
-            convert_val = date_val.date().strftime(module.params['date_format'])
+            convert_val = date_val.date().strftime(module.params['date_format'].strip())
             result_val()
 
         else:
