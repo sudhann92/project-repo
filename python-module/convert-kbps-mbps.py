@@ -1,12 +1,32 @@
 import pandas as pd
-import re
+#import re
 import datetime
-import sys
-import math
+#import sys
+#import math
 import pathlib
 
 #file_path_value = "C:\\Users\\P4014297\\Automation-folder\\NTUC-Automation\\01.Network\\test-file.xlsx"
 # Load the Excel file
+#datetime.datetime.today().strftime("%d-%B-%Y-%H:%M:%S")
+
+def output_folder_creation(path_of_folder):
+    today_date = datetime.datetime.today().strftime("%d-%B-%Y")
+    __path= pathlib.Path(path_of_folder)
+    folder_name = 'Report' + '_' + today_date
+    joined_path= __path / folder_name
+    if not joined_path.exists():
+        joined_path.mkdir(exist_ok=False)
+    return joined_path
+
+def convert_to_mbps(value):
+            if isinstance(value, str) and 'kbps' in value:
+                # Extract the numeric part and convert to mbps
+                return float(value.replace(' kbps', '')) / 1024
+            elif isinstance(value, str) and 'Mbps' in value:
+                # Extract the numeric part for Mbps
+                return float(value.replace(' Mbps', ''))
+            return value
+
 def read_excel_file(file_name):
     for file_path_value in file_name:
         df_file = pd.read_excel(file_path_value)
@@ -27,14 +47,6 @@ def read_excel_file(file_name):
         df_file = df_file.drop(columns=[col for col in df_file.columns if 'MIN' in col])
 
         # Function to convert kbps to mbps (if value is in kbps)
-        def convert_to_mbps(value):
-            if isinstance(value, str) and 'kbps' in value:
-                # Extract the numeric part and convert to mbps
-                return float(value.replace(' kbps', '')) / 1024
-            elif isinstance(value, str) and 'Mbps' in value:
-                # Extract the numeric part for Mbps
-                return float(value.replace(' Mbps', ''))
-            return value
 
         # # Apply conversion to all relevant columns
         columns_to_convert = ['Circuit utilization (IN) - AVG', 'Circuit utilization (OUT) - AVG',
@@ -56,7 +68,7 @@ def read_excel_file(file_name):
                df_file_first_two_lines.to_excel(writer_value,startrow=0, index=False)
                actual_value.to_excel(writer_value,startrow=6, index=False)
               
-        # print("Processing complete. The new file is saved as 'processed_utilization.xlsx'.")
+        print("Processing complete. The new file is saved as 'processed_utilization.xlsx'.")
 
 def main():
     path = input("\nEnter the Path where sheet located:").strip()
