@@ -1,24 +1,32 @@
+#For this script Python and Pandas,openpyxl,pathlib,datetime,sys required
 import pandas as pd
-#import re
 import datetime
-#import sys
-#import math
+import sys
 import pathlib
 
-#file_path_value = "C:\\Users\\P4014297\\Automation-folder\\NTUC-Automation\\01.Network\\test-file.xlsx"
-# Load the Excel file
-#datetime.datetime.today().strftime("%d-%B-%Y-%H:%M:%S")
-
+# Function to create the output folder path
 def output_folder_creation(path_of_folder):
-    today_date = datetime.datetime.today().strftime("%d-%B-%Y")
-    __path= pathlib.Path(path_of_folder)
+    today_date = datetime.datetime.today().strftime("%b-%Y")
+    __path = pathlib.Path(path_of_folder + '/')
     folder_name = 'Report' + '_' + today_date
     joined_path= __path / folder_name
-    if not joined_path.exists():
-        joined_path.mkdir(exist_ok=False)
+    try:
+        if not joined_path.exists():
+            joined_path.mkdir(exist_ok=False)
+
+    except FileNotFoundError as Fs:
+        current_path = pathlib.Path.cwd()
+        print("-" * 60)
+        print(f'\033[93mThe {path_of_folder} drive not found in your computer.Hence creating folder in current path {current_path} and proceed the script\033[00m')
+        print("-" * 60)
+        folder_name = 'Report' + '_' + today_date
+        joined_path= current_path / folder_name
+        if not joined_path.exists():
+            joined_path.mkdir(exist_ok=False)
     return joined_path
 
-def convert_to_mbps(value):
+# Function to convert kbps to mbps (if value is in kbps)
+def convert_kbps_to_mbps(value):
             if isinstance(value, str) and 'kbps' in value:
                 # Extract the numeric part and convert to mbps
                 return float(value.replace(' kbps', '')) / 1024
@@ -27,61 +35,69 @@ def convert_to_mbps(value):
                 return float(value.replace(' Mbps', ''))
             return value
 
-def read_excel_file(file_name):
+def read_excel_file(file_name,path_folder_location):
+    #Dynamic file name used the count and store the date time for the file name
+    File_count= 0
+    date_time = datetime.datetime.today().strftime("%d-%b-%y-%H-%M-%S")
+    columns_to_convert = ['Circuit utilization (IN) - AVG', 'Circuit utilization (OUT) - AVG',
+                            'Circuit utilization (IN) - MAX', 'Circuit utilization (OUT) - MAX']
     for file_path_value in file_name:
+        File_count += 1 
+        excel_file_name = f"{File_count}_Circuit_Mbps_percentage__{date_time}.xlsx" 
         df_file = pd.read_excel(file_path_value)
+         #grab the first two lines and store in variable for new file creation
         df_file_first_two_lines = df_file.head(1).dropna(how ='all', axis=1)
-        #df_file_two_lines = df_file_first_two_lines.dropna(how ='all', axis=1)
-        print(df_file_first_two_lines)
+        #print(df_file_first_two_lines)
         #drop the first two coloumns as index value
         df_file = df_file.drop([0, 1])
         #make the third coloumn as 0 index as main title value
         df_file.columns = df_file.iloc[0]
-        # drop the second index duplicate value and reset the index value
-        df_file = df_file.drop(2).reset_index(drop=True)
+        # drop the second index duplicate value and reset the index value and drop the empty line in the rows and columns
+        df_file = df_file.drop(2).reset_index(drop=True).dropna(how='all')
         #drop the empty line in the excel
-        df_file = df_file.dropna(how='all')
-
-
+        #df_file = df_file.dropna(how='all')
         # Drop 'MIN' columns (if they contain the word "MIN" in the column name)
         df_file = df_file.drop(columns=[col for col in df_file.columns if 'MIN' in col])
-
         # Function to convert kbps to mbps (if value is in kbps)
+        try:
+            for col in columns_to_convert:
+                df_file[col] = df_file[col].apply(convert_kbps_to_mbps)
+            # # Calculate the percentage for all converted mbps columns
+            for col in columns_to_convert:
+                df_file[f'{col} (%)'] = ((df_file[col] / 300) * 100).round(2)
+        except TypeError as Ts:
+            print( "-" * 80)
+            print(f"The Given file not a proper data \033[91m [{pathlib.Path(file_path_value).name}] \033[00mKindly provide the proper file to proceed it")
+            print("-" * 80)
+            sys.exit(1)
 
-        # # Apply conversion to all relevant columns
-        columns_to_convert = ['Circuit utilization (IN) - AVG', 'Circuit utilization (OUT) - AVG',
-                            'Circuit utilization (IN) - MAX', 'Circuit utilization (OUT) - MAX']
-
-        for col in columns_to_convert:
-            df_file[col] = df_file[col].apply(convert_to_mbps)
-
-
-        # # Calculate the percentage for all converted mbps columns
-        for col in columns_to_convert:
-            df_file[f'{col} (%)'] = ((df_file[col] / 300) * 100).round(2)
-
+        #drop the older column value and keep the new column value with percentage
         actual_value = df_file.drop(columns=[col for col in columns_to_convert])
         # # Write the new data to a new Excel file
-
-        #result = pd.concat([actual_value, First_two_value ], ignore_index=True)
-        with pd.ExcelWriter('processed_utilization.xlsx') as writer_value:
+        output_folder_path = output_folder_creation(path_folder_location) 
+        out_file_name = f"{output_folder_path}\\{excel_file_name}"
+        with pd.ExcelWriter(out_file_name) as writer_value:
                df_file_first_two_lines.to_excel(writer_value,startrow=0, index=False)
                actual_value.to_excel(writer_value,startrow=6, index=False)
               
-        print("Processing complete. The new file is saved as 'processed_utilization.xlsx'.")
+        print(f"************\033[92m Processing completed. The new file is saved as  [{out_file_name}] \033[00m***************")
 
 def main():
-    path = input("\nEnter the Path where sheet located:").strip()
+    path = input("\nEnter the Path folder where sheet located:").strip()
     path = pathlib.Path(path)
     user_file = input("\nEnter the file name with wildcard(*) to be extracted:").strip()
+    output_file = str(input("\nEnter the drive name or path (example c:, d:, e: or c:\\user\\path) to create the new process file: ")).strip()
     file = list(path.rglob(user_file))
-    #global output_destination_path
-    #output_destination_path = str(input("\nEnter the destination folder path to download the new excel file:")).strip()
+    if len(file) == 0:
+            print('---------------------------------------------------------------\n')
+            print('\nGiven path is empty folder kindly place the proper file and run it again. Exit the script\n')
+            print('----------------------------------------------------------\n')
+            sys.exit(1)
+#    output_destination_path = str(input("\nEnter the destination folder path to download the new excel file:")).strip()
     print('-'* 80)
     print(f"This will create the separate excel with converted kbps to mbps value")
     print('-'* 80)
-    read_excel_file(file)
-
+    read_excel_file(file,output_file)
 
 
 if __name__ =='__main__':
