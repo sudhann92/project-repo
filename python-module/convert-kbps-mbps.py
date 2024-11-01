@@ -41,12 +41,17 @@ def read_excel_file(file_name,path_folder_location):
     date_time = datetime.datetime.today().strftime("%d-%b-%y-%H-%M-%S")
     columns_to_convert = ['Circuit utilization (IN) - AVG', 'Circuit utilization (OUT) - AVG',
                             'Circuit utilization (IN) - MAX', 'Circuit utilization (OUT) - MAX']
+     # Write the new data to a new Excel file
+    output_folder_path = output_folder_creation(path_folder_location) 
     for file_path_value in file_name:
         File_count += 1 
-        excel_file_name = f"{File_count}_Circuit_Mbps_percentage__{date_time}.xlsx" 
         df_file = pd.read_excel(file_path_value)
          #grab the first two lines and store in variable for new file creation
         df_file_first_two_lines = df_file.head(1).dropna(how ='all', axis=1)
+        #Get the bandwidth value for average calculation
+        df_mbps_value = int(df_file_first_two_lines["Bandwidth"].iloc[0].split(" ")[0])
+        excel_file_name = f"{File_count}_Circuit_{df_mbps_value}Mbps_percentage_{date_time}.xlsx" 
+        #print(df_mbps_value)
         #print(df_file_first_two_lines)
         #drop the first two coloumns as index value
         df_file = df_file.drop([0, 1])
@@ -64,7 +69,7 @@ def read_excel_file(file_name,path_folder_location):
                 df_file[col] = df_file[col].apply(convert_kbps_to_mbps)
             # # Calculate the percentage for all converted mbps columns
             for col in columns_to_convert:
-                df_file[f'{col} (%)'] = ((df_file[col] / 300) * 100).round(2)
+                df_file[f'{col} (%)'] = ((df_file[col] / df_mbps_value) * 100).round(2)
         except TypeError as Ts:
             print( "-" * 80)
             print(f"The Given file not a proper data \033[91m [{pathlib.Path(file_path_value).name}] \033[00mKindly provide the proper file to proceed it")
@@ -73,12 +78,23 @@ def read_excel_file(file_name,path_folder_location):
 
         #drop the older column value and keep the new column value with percentage
         actual_value = df_file.drop(columns=[col for col in columns_to_convert])
+        #calculate the mean or average and Max value in the column
+        mean_in_avg = round(actual_value['Circuit utilization (IN) - AVG (%)'].mean(), 4)
+        mean_out_avg = round(actual_value['Circuit utilization (OUT) - AVG (%)'].mean(), 4)
+        max_in = actual_value['Circuit utilization (IN) - MAX (%)'].max()
+        max_out = actual_value['Circuit utilization (OUT) - MAX (%)'].max()
+        summary_data = pd.DataFrame({
+            'Summary': ['Mean Circuit utilization (IN) - AVG (%)', 'Mean Circuit utilization (OUT) - AVG (%)',
+                        'Max Circuit utilization (IN) - MAX (%)', 'Max Circuit utilization (OUT) - MAX (%)'],
+            'Values': [mean_in_avg, mean_out_avg, max_in, max_out]
+        })
         # # Write the new data to a new Excel file
-        output_folder_path = output_folder_creation(path_folder_location) 
+        #output_folder_path = output_folder_creation(path_folder_location) 
         out_file_name = f"{output_folder_path}\\{excel_file_name}"
         with pd.ExcelWriter(out_file_name) as writer_value:
                df_file_first_two_lines.to_excel(writer_value,startrow=0, index=False)
                actual_value.to_excel(writer_value,startrow=6, index=False)
+               summary_data.to_excel(writer_value, startrow=actual_value.shape[0] + 10, index= False)
               
         print(f"************\033[92m Processing completed. The new file is saved as  [{out_file_name}] \033[00m***************")
 
