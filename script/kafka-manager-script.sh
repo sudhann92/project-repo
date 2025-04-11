@@ -7,32 +7,64 @@ TEMPLATE_PATH="/opt/kafka/custom-script/connector_template.json"
 BOOTSTRAP_SERVER="localhost:9091"
 GREEN='\033[0;32m'
 NC='\033[0m'
+items=( "kafka" "kafka-connect" "custom-kafka-file-connector" )
 
-function Service_status_kafka_kafka_connect() {
-        kafka_status=$(systemctl status kafka.service | grep -iw "active" | cut -d ":" -f2)
-        kafka_connect_status=$(systemctl status kafka-connect.service | grep -i "active" | cut -d ":" -f2)
-        echo "-----------------------------------------"
-        echo -e "Kafka service status = $kafka_status\n"
-        echo "-----------------------------------------"
-        echo -e "Kafka_connect service status = $kafka_connect_status\n"
+
+function Service_status_kafka_kafka_connect_custom_connector() {
+        for service in ${items[@]}
+        do
+                _status=$(systemctl status "$service" | grep -iw "active" | cut -d ":" -f2)
+                echo "-----------------------------------------"
+                echo -e "$service service status = $_status"
+                echo "-----------------------------------------"
+        done
 }
 
 
 function Restart_kafka_service() {
-        echo "Restarting the Kafka service......."
-        systemctl restart kafka.service
-        kafka_status_1=$(systemctl status kafka.service | grep -iw "active" | cut -d ":" -f2)
-        echo "-----------------------------------------"
-        echo -e "Kafka service status = $kafka_status_1 \n"
+        echo "Before Restarting the Kafka service Need to Stop the Kafka_Conncetor & Custom_File_connector services......."
+        systemctl stop ${items[2]} && sleep 2
+        systemctl stop ${items[1]} && sleep 2
+        systemctl restart ${items[0]}
+        kafka_status_1=$(systemctl status "${items[0]}" | grep -iw "active" | cut -d ":" -f2)
+        sleep 4
+        systemctl status ${items[0]} | grep -iw "running"
+        out_put=$(echo $?)
+
+        if [ "$out_put" == 0 ]
+        then
+            echo "-----------------------------------------"
+            echo -e "Kafka service status = $kafka_status_1 RUNNING\n"
+            echo "Starting the Kafka_connector & Custom_File_connector services......."
+            systemctl start ${items[1]} && sleep 3
+            systemctl start ${items[0]} && sleep 3
+        else
+                echo -e "\033[31m THERE IS SOME ISSUE IN KAFKA SERVICE KINDLY CHECK MANUALLY \033[0m\n"
+        fi
+
+
 }
 
 
 function Restart_kafka_connect_service() {
-        echo "Restarting the Kafka_connect service......."
-        systemctl restart kafka-connect.service
+        echo "Before restarting the Kafka_connect service Need to Stop the Custom_File_connector service......."
+        systemctl stop ${items[2]} && sleep 2
+        echo "Restarting the kafka_connect service......."
+        systemctl stop ${items[1]} && ]sleep 2
         kafka_connect_status_1=$(systemctl status kafka-connect.service | grep -i "active" | cut -d ":" -f2)
+        sleep 4
+        systemctl status ${items[1]} | grep -iw "running"
+        out_put=$(echo $?)
+        if [ "$out_put" == 0 ]
+        then
         echo "-----------------------------------------"
-        echo -e "Kafka_connect service status = $kafka_connect_status_1 \n"
+        echo -e "Kafka_connect service status = $kafka_connect_status_1 RUNNING\n"
+        echo "Starting the Custom_File_connector services......."
+        systemctl start ${items[2]} && sleep 2
+        else
+                echo -e "\033[31m THERE IS SOME ISSUE IN KAFKA_CONNECT SERVICE KINDLY CHECK MANUALLY \033[0m\n"
+        fi
+
 }
 
 
@@ -55,12 +87,20 @@ function view_connectors() {
 }
 
 function check_connector_status() {
+    view_connectors
+    echo "----------------------------------------"
+    echo "Based on above list of connection kindly select and Enter which connector do you want to check the status"
+    echo "----------------------------------------"
     read -p "Enter connector name to check status: " cname
     curl -s "$CONNECT_URL/connectors/$cname/status" | jq
 }
 
 
 function check_connector_config() {
+    view_connectors
+    echo "----------------------------------------"
+    echo "Based on above list of connection kindly select and Enter which connector do you want to check the config"
+    echo "----------------------------------------"
     read -p "Enter connector name to check config details: " cname
     curl -s "$CONNECT_URL/connectors/$cname/config" | jq
 }
@@ -89,6 +129,10 @@ function create_connector() {
 }
 
 function delete_connector() {
+    view_connectors
+    echo "----------------------------------------"
+    echo "Based on above list of connectior kindly select and Enter which connector do you want to DELETE PERMENTALY"
+    echo "----------------------------------------"
     read -p "Enter connector name to delete: " cname
     curl -s -X DELETE "$CONNECT_URL/connectors/$cname" | jq
     sleep 3
@@ -133,25 +177,27 @@ while true; do
     echo -e "${GREEN}===================================="
     echo -e "    Kafka Connector Manager"
     echo "===================================="
-    echo -e "\n\t1. Check the status of Kafka and kafka connect"
-    echo -e "\n\t2. Restart the kafka"
-    echo -e "\n\t3. Restart the Kafka-Connect"
-    echo -e "\n\t4. kafka API status"
-    echo -e "\n\t5. View Kafka Connectors"
-    echo -e "\n\t6. Check Particular Connector Status"
-    echo -e "\n\t7. Check Connector Configuration in Kafka API"
-    echo -e "\n\t8. Create New Debezium Connector"
+    echo -e "\n\t1. Check the status of Kafka,kafka-connect,Custom-file-connector service"
+    echo -e "\n\t2. Restart the kafka service"
+    echo -e "\n\t3. Restart the Kafka-Connect service"
+    echo -e "\n\t4. kafka-connect API status"
+    echo -e "\n\t5. View the External kafka Connectors"
+    echo -e "\n\t6. Check Particular External Connector Status"
+    echo -e "\n\t7. Check External Connector Configuration in Kafka API"
+    echo -e "\n\t8. Create New MYSQL TABLE Debezium Connector"
     echo -e "\n\t9. Display the Topic Data (from beginning)"
     echo -e "\n\t10. List the Kafka Topics"
-    echo -e "\n\t11. Restart the Connector"
-    echo -e "\n\t12. Delete a Connector"
+    echo -e "\n\t11. Restart the External Connector"
+    echo -e "\n\t12. Delete an External Connector"
     echo -e "\n\t13. Delete a Topic"
     echo -e "\n\t14. Exit"${NC}
 
-    read -p "Choose an option: " choice
+    echo -e "\n"
+    read -p "Chooose an option: " choice
+    echo -e "\n"
 
     case $choice in
-        1) Service_status_kafka_kafka_connect ;;
+        1) Service_status_kafka_kafka_connect_custom_connector ;;
         2) Restart_kafka_service ;;
         3) Restart_kafka_connect_service ;;
         4) Check_kafka_connect_API_Status ;;
