@@ -1,0 +1,39 @@
+# cat /etc/systemd/system/custom-kafka-CPU-connector.service
+[Unit]
+Description=Custom CPU Kafka Connector Service
+After=network-online.target local-fs.target
+Wants=network-online.target kafka.service kafka-connect.service
+PartOf=kafka.service kafka-connect.service
+
+[Service]
+ExecStart=/bin/bash -c '/usr/bin/python3 /opt/kafka/config/custom-kafka-connector/kafka-json-CPU-Memory-file-connector.py >> /opt/kafka/logs/kafka-connector-output-CPU.log 2>> /opt/kafka/logs/kafka-connector-error-CPU.log'
+WorkingDirectory=/opt/kafka/config/custom-kafka-connector
+Restart=on-failure
+RestartSec=10
+User=root
+Group=root
+KillMode=control-group
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+# cat /etc/systemd/system/custom-kafka-chunk-correlation-connector.service
+[Unit]
+Description=Custom Kafka Connector correlation Service
+After=network-online.target local-fs.target
+Wants=network-online.target kafka.service kafka-connect.service
+PartOf=kafka.service kafka-connect.service
+
+[Service]
+ExecStart=/bin/bash -c '/usr/bin/python3 /opt/kafka/config/custom-kafka-connector/kafka-new-chunk-method-correlation.py >> /opt/kafka/logs/kafka-new-chunk-correlation-output.log 2>> /opt/kafka/logs/kafka-chunk-correlation-error.log'
+WorkingDirectory=/opt/kafka/config/custom-kafka-connector
+Restart=on-failure
+RestartSec=10
+User=root
+Group=root
+KillMode=control-group
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
