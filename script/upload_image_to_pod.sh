@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-IMAGE_DIR="/home/ensemble"
+IMAGE_DIR="/home/<user dir>"
 DIR_PATH="/var/vnf_img"
 echo " "
 read -rp "Enter One image file name at a time which available in /home/ensemble and move to /var/vnf_img/:" Image_name
