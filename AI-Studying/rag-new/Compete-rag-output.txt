@@ -1,0 +1,434 @@
+~/rag-project ➜  cd /home/lab-user/rag-project
+uv run python complete_rag_demo.py
+🎯 TechCorp PolicyCopilot - Complete RAG Pipeline Demo
+============================================================
+This demo shows how all RAG components work together!
+============================================================
+
+============================================================
+DEMO 1: What's the reimbursement policy for home office equipment?
+============================================================
+
+🚀 COMPLETE RAG PIPELINE DEMO
+============================================================
+❓ User Question: What's the reimbursement policy for home office equipment?
+============================================================
+📚 SECTION 1: DOCUMENT LOADING & CHUNKING
+==================================================
+📄 Loaded 5 policy documents
+✂️ Created 13 chunks from 5 documents
+📏 Average chunk size: 162 characters
+
+🗄️ SECTION 2: VECTOR DATABASE SETUP
+==================================================
+🗄️ Created collection: techcorp_policies
+📊 Similarity metric: cosine
+/home/lab-user/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 79.3M/79.3M [00:01<00:00, 68.4MiB/s]
+✅ Stored 13 chunks in vector database
+📈 Collection count: 13
+
+🔍 SECTION 3: QUERY PROCESSING
+==================================================
+modules.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 349/349 [00:00<00:00, 736kB/s]
+config_sentence_transformers.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 116/116 [00:00<00:00, 450kB/s]
+README.md: 10.5kB [00:00, 30.7MB/s]
+sentence_bert_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 53.0/53.0 [00:00<00:00, 159kB/s]
+config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 612/612 [00:00<00:00, 3.27MB/s]
+model.safetensors: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 90.9M/90.9M [00:01<00:00, 71.3MB/s]
+tokenizer_config.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 350/350 [00:00<00:00, 2.36MB/s]
+vocab.txt: 232kB [00:00, 10.3MB/s]
+tokenizer.json: 466kB [00:00, 27.9MB/s]
+special_tokens_map.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 112/112 [00:00<00:00, 408kB/s]
+config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 190/190 [00:00<00:00, 383kB/s]
+🤖 Using model: SentenceTransformer(
+  (0): Transformer({'max_seq_length': 256, 'do_lower_case': False, 'architecture': 'BertModel'})
+  (1): Pooling({'word_embedding_dimension': 384, 'pooling_mode_cls_token': False, 'pooling_mode_mean_tokens': True, 'pooling_mode_max_tokens': False, 'pooling_mode_mean_sqrt_len_tokens': False, 'pooling_mode_weightedmean_tokens': False, 'pooling_mode_lasttoken': False, 'include_prompt': True})
+  (2): Normalize()
+)
+📐 Embedding dimensions: 384
+📝 Original query: 'What's the reimbursement policy for home office equipment?'
+🧹 Cleaned query: 'what's the reimbursement policy for home office equipment?'
+🔢 Query embedding shape: (1, 384)
+📊 Embedding sample: [-0.05989284  0.08903444  0.03420069 -0.0423887  -0.022397  ]...
+
+🔍 SECTION 4: VECTOR SEARCH
+==================================================
+🎯 Searching for top 3 results
+📊 Found 3 relevant chunks
+
+1. Equipment and Supplies Reimbursement (Category: reimbursement)
+   Similarity: 0.726
+   Content: Work-related equipment and supplies purchased for home office use are eligible for reimbursement. Th...
+
+2. Home Office Equipment Reimbursement (Category: reimbursement)
+   Similarity: 0.603
+   Content: Employees working from home may claim up to $500 per year for office equipment including desks, chai...
+
+3. Remote Work Furniture Policy (Category: reimbursement)
+   Similarity: 0.569
+   Content: reimbursement is $300 per item with manager approval required. All furniture must meet ergonomic sta...
+
+📝 SECTION 5: CONTEXT AUGMENTATION
+==================================================
+📄 Assembled context from 3 sources
+📏 Context length: 726 characters
+📝 Augmented prompt length: 1078 characters
+🔗 Context sources: ['Equipment and Supplies Reimbursement', 'Home Office Equipment Reimbursement', 'Remote Work Furniture Policy']
+
+🤖 SECTION 6: RESPONSE GENERATION
+==================================================
+⏳ Processing with LLM...
+✅ Generated response length: 509 characters
+📋 Response includes: Policy references, key points, limitations
+
+🎉 FINAL RESULT
+============================================================
+
+Based on the company policies provided, here's the answer to your question:
+
+The relevant policies contain information about various company guidelines and procedures. 
+The retrieved context provides specific details that can help answer your question.
+
+Key points from the policies:
+- Multiple policy sources were consulted
+- Information is current and accurate
+- Specific requirements and limitations are included
+
+Please refer to the specific policy documents for complete details and any recent updates.
+
+============================================================
+
+Press Enter to continue to next demo...
+
+============================================================
+DEMO 2: Can I get money back for buying a desk?
+============================================================
+
+🚀 COMPLETE RAG PIPELINE DEMO
+============================================================
+❓ User Question: Can I get money back for buying a desk?
+============================================================
+📚 SECTION 1: DOCUMENT LOADING & CHUNKING
+==================================================
+📄 Loaded 5 policy documents
+✂️ Created 13 chunks from 5 documents
+📏 Average chunk size: 162 characters
+
+🗄️ SECTION 2: VECTOR DATABASE SETUP
+==================================================
+🗄️ Created collection: techcorp_policies
+📊 Similarity metric: cosine
+✅ Collection already contains 13 chunks
+📈 Collection count: 13
+
+🔍 SECTION 3: QUERY PROCESSING
+==================================================
+🤖 Using model: SentenceTransformer(
+  (0): Transformer({'max_seq_length': 256, 'do_lower_case': False, 'architecture': 'BertModel'})
+  (1): Pooling({'word_embedding_dimension': 384, 'pooling_mode_cls_token': False, 'pooling_mode_mean_tokens': True, 'pooling_mode_max_tokens': False, 'pooling_mode_mean_sqrt_len_tokens': False, 'pooling_mode_weightedmean_tokens': False, 'pooling_mode_lasttoken': False, 'include_prompt': True})
+  (2): Normalize()
+)
+📐 Embedding dimensions: 384
+📝 Original query: 'Can I get money back for buying a desk?'
+🧹 Cleaned query: 'can i get money back for buying a desk?'
+🔢 Query embedding shape: (1, 384)
+📊 Embedding sample: [-0.03226877  0.02951547  0.044373   -0.03186495 -0.0643709 ]...
+
+🔍 SECTION 4: VECTOR SEARCH
+==================================================
+🎯 Searching for top 3 results
+📊 Found 3 relevant chunks
+
+1. Remote Work Furniture Policy (Category: reimbursement)
+   Similarity: 0.480
+   Content: Remote employees may purchase ergonomic furniture for their home office setup. This includes standin...
+
+2. Remote Work Furniture Policy (Category: reimbursement)
+   Similarity: 0.469
+   Content: reimbursement is $300 per item with manager approval required. All furniture must meet ergonomic sta...
+
+3. Equipment and Supplies Reimbursement (Category: reimbursement)
+   Similarity: 0.437
+   Content: Work-related equipment and supplies purchased for home office use are eligible for reimbursement. Th...
+
+📝 SECTION 5: CONTEXT AUGMENTATION
+==================================================
+📄 Assembled context from 3 sources
+📏 Context length: 716 characters
+📝 Augmented prompt length: 1049 characters
+🔗 Context sources: ['Remote Work Furniture Policy', 'Remote Work Furniture Policy', 'Equipment and Supplies Reimbursement']
+
+🤖 SECTION 6: RESPONSE GENERATION
+==================================================
+⏳ Processing with LLM...
+✅ Generated response length: 509 characters
+📋 Response includes: Policy references, key points, limitations
+
+🎉 FINAL RESULT
+============================================================
+
+Based on the company policies provided, here's the answer to your question:
+
+The relevant policies contain information about various company guidelines and procedures. 
+The retrieved context provides specific details that can help answer your question.
+
+Key points from the policies:
+- Multiple policy sources were consulted
+- Information is current and accurate
+- Specific requirements and limitations are included
+
+Please refer to the specific policy documents for complete details and any recent updates.
+
+============================================================
+
+Press Enter to continue to next demo...
+
+============================================================
+DEMO 3: How much can I claim for my home office?
+============================================================
+
+🚀 COMPLETE RAG PIPELINE DEMO
+============================================================
+❓ User Question: How much can I claim for my home office?
+============================================================
+📚 SECTION 1: DOCUMENT LOADING & CHUNKING
+==================================================
+📄 Loaded 5 policy documents
+✂️ Created 13 chunks from 5 documents
+📏 Average chunk size: 162 characters
+
+🗄️ SECTION 2: VECTOR DATABASE SETUP
+==================================================
+🗄️ Created collection: techcorp_policies
+📊 Similarity metric: cosine
+✅ Collection already contains 13 chunks
+📈 Collection count: 13
+
+🔍 SECTION 3: QUERY PROCESSING
+==================================================
+🤖 Using model: SentenceTransformer(
+  (0): Transformer({'max_seq_length': 256, 'do_lower_case': False, 'architecture': 'BertModel'})
+  (1): Pooling({'word_embedding_dimension': 384, 'pooling_mode_cls_token': False, 'pooling_mode_mean_tokens': True, 'pooling_mode_max_tokens': False, 'pooling_mode_mean_sqrt_len_tokens': False, 'pooling_mode_weightedmean_tokens': False, 'pooling_mode_lasttoken': False, 'include_prompt': True})
+  (2): Normalize()
+)
+📐 Embedding dimensions: 384
+📝 Original query: 'How much can I claim for my home office?'
+🧹 Cleaned query: 'how much can i claim for my home office?'
+🔢 Query embedding shape: (1, 384)
+📊 Embedding sample: [-0.02280209  0.01294923  0.02920434 -0.0392937   0.00312525]...
+
+🔍 SECTION 4: VECTOR SEARCH
+==================================================
+🎯 Searching for top 3 results
+📊 Found 3 relevant chunks
+
+1. Home Office Equipment Reimbursement (Category: reimbursement)
+   Similarity: 0.754
+   Content: Employees working from home may claim up to $500 per year for office equipment including desks, chai...
+
+2. Remote Work Furniture Policy (Category: reimbursement)
+   Similarity: 0.447
+   Content: Remote employees may purchase ergonomic furniture for their home office setup. This includes standin...
+
+3. Equipment and Supplies Reimbursement (Category: reimbursement)
+   Similarity: 0.444
+   Content: Work-related equipment and supplies purchased for home office use are eligible for reimbursement. Th...
+
+📝 SECTION 5: CONTEXT AUGMENTATION
+==================================================
+📄 Assembled context from 3 sources
+📏 Context length: 731 characters
+📝 Augmented prompt length: 1065 characters
+🔗 Context sources: ['Home Office Equipment Reimbursement', 'Remote Work Furniture Policy', 'Equipment and Supplies Reimbursement']
+
+🤖 SECTION 6: RESPONSE GENERATION
+==================================================
+⏳ Processing with LLM...
+✅ Generated response length: 509 characters
+📋 Response includes: Policy references, key points, limitations
+
+🎉 FINAL RESULT
+============================================================
+
+Based on the company policies provided, here's the answer to your question:
+
+The relevant policies contain information about various company guidelines and procedures. 
+The retrieved context provides specific details that can help answer your question.
+
+Key points from the policies:
+- Multiple policy sources were consulted
+- Information is current and accurate
+- Specific requirements and limitations are included
+
+Please refer to the specific policy documents for complete details and any recent updates.
+
+============================================================
+
+Press Enter to continue to next demo...
+
+============================================================
+DEMO 4: What's the travel expense policy?
+============================================================
+
+🚀 COMPLETE RAG PIPELINE DEMO
+============================================================
+❓ User Question: What's the travel expense policy?
+============================================================
+📚 SECTION 1: DOCUMENT LOADING & CHUNKING
+==================================================
+📄 Loaded 5 policy documents
+✂️ Created 13 chunks from 5 documents
+📏 Average chunk size: 162 characters
+
+🗄️ SECTION 2: VECTOR DATABASE SETUP
+==================================================
+🗄️ Created collection: techcorp_policies
+📊 Similarity metric: cosine
+✅ Collection already contains 13 chunks
+📈 Collection count: 13
+
+🔍 SECTION 3: QUERY PROCESSING
+==================================================
+🤖 Using model: SentenceTransformer(
+  (0): Transformer({'max_seq_length': 256, 'do_lower_case': False, 'architecture': 'BertModel'})
+  (1): Pooling({'word_embedding_dimension': 384, 'pooling_mode_cls_token': False, 'pooling_mode_mean_tokens': True, 'pooling_mode_max_tokens': False, 'pooling_mode_mean_sqrt_len_tokens': False, 'pooling_mode_weightedmean_tokens': False, 'pooling_mode_lasttoken': False, 'include_prompt': True})
+  (2): Normalize()
+)
+📐 Embedding dimensions: 384
+📝 Original query: 'What's the travel expense policy?'
+🧹 Cleaned query: 'what's the travel expense policy?'
+🔢 Query embedding shape: (1, 384)
+📊 Embedding sample: [ 0.05946587  0.04194313 -0.01191735  0.04838424  0.07805506]...
+
+🔍 SECTION 4: VECTOR SEARCH
+==================================================
+🎯 Searching for top 3 results
+📊 Found 3 relevant chunks
+
+1. Travel Expense Guidelines (Category: travel)
+   Similarity: 0.554
+   Content: Business travel expenses are reimbursable when pre-approved by your manager. Meals are covered up to...
+
+2. Travel Expense Guidelines (Category: travel)
+   Similarity: 0.496
+   Content: is mandatory for all business trips exceeding 7 days....
+
+3. Travel Expense Guidelines (Category: travel)
+   Similarity: 0.471
+   Content: All receipts must be submitted within 14 days of return. International travel requires additional ap...
+
+📝 SECTION 5: CONTEXT AUGMENTATION
+==================================================
+📄 Assembled context from 3 sources
+📏 Context length: 558 characters
+📝 Augmented prompt length: 885 characters
+🔗 Context sources: ['Travel Expense Guidelines', 'Travel Expense Guidelines', 'Travel Expense Guidelines']
+
+🤖 SECTION 6: RESPONSE GENERATION
+==================================================
+⏳ Processing with LLM...
+✅ Generated response length: 509 characters
+📋 Response includes: Policy references, key points, limitations
+
+🎉 FINAL RESULT
+============================================================
+
+Based on the company policies provided, here's the answer to your question:
+
+The relevant policies contain information about various company guidelines and procedures. 
+The retrieved context provides specific details that can help answer your question.
+
+Key points from the policies:
+- Multiple policy sources were consulted
+- Information is current and accurate
+- Specific requirements and limitations are included
+
+Please refer to the specific policy documents for complete details and any recent updates.
+
+============================================================
+
+Press Enter to continue to next demo...
+
+============================================================
+DEMO 5: How many vacation days do I get?
+============================================================
+
+🚀 COMPLETE RAG PIPELINE DEMO
+============================================================
+❓ User Question: How many vacation days do I get?
+============================================================
+📚 SECTION 1: DOCUMENT LOADING & CHUNKING
+==================================================
+📄 Loaded 5 policy documents
+✂️ Created 13 chunks from 5 documents
+📏 Average chunk size: 162 characters
+
+🗄️ SECTION 2: VECTOR DATABASE SETUP
+==================================================
+🗄️ Created collection: techcorp_policies
+📊 Similarity metric: cosine
+✅ Collection already contains 13 chunks
+📈 Collection count: 13
+
+🔍 SECTION 3: QUERY PROCESSING
+==================================================
+🤖 Using model: SentenceTransformer(
+  (0): Transformer({'max_seq_length': 256, 'do_lower_case': False, 'architecture': 'BertModel'})
+  (1): Pooling({'word_embedding_dimension': 384, 'pooling_mode_cls_token': False, 'pooling_mode_mean_tokens': True, 'pooling_mode_max_tokens': False, 'pooling_mode_mean_sqrt_len_tokens': False, 'pooling_mode_weightedmean_tokens': False, 'pooling_mode_lasttoken': False, 'include_prompt': True})
+  (2): Normalize()
+)
+📐 Embedding dimensions: 384
+📝 Original query: 'How many vacation days do I get?'
+🧹 Cleaned query: 'how many vacation days do i get?'
+🔢 Query embedding shape: (1, 384)
+📊 Embedding sample: [ 0.04914932  0.01118138  0.02954272  0.06925447 -0.03390819]...
+
+🔍 SECTION 4: VECTOR SEARCH
+==================================================
+🎯 Searching for top 3 results
+📊 Found 3 relevant chunks
+
+1. Vacation and PTO Policy (Category: benefits)
+   Similarity: 0.521
+   Content: Full-time employees accrue 15 days of paid time off per year. Vacation requests must be submitted at...
+
+2. Travel Expense Guidelines (Category: travel)
+   Similarity: 0.466
+   Content: is mandatory for all business trips exceeding 7 days....
+
+3. Travel Expense Guidelines (Category: travel)
+   Similarity: 0.301
+   Content: Business travel expenses are reimbursable when pre-approved by your manager. Meals are covered up to...
+
+📝 SECTION 5: CONTEXT AUGMENTATION
+==================================================
+📄 Assembled context from 3 sources
+📏 Context length: 556 characters
+📝 Augmented prompt length: 882 characters
+🔗 Context sources: ['Vacation and PTO Policy', 'Travel Expense Guidelines', 'Travel Expense Guidelines']
+
+🤖 SECTION 6: RESPONSE GENERATION
+==================================================
+⏳ Processing with LLM...
+✅ Generated response length: 509 characters
+📋 Response includes: Policy references, key points, limitations
+
+🎉 FINAL RESULT
+============================================================
+
+Based on the company policies provided, here's the answer to your question:
+
+The relevant policies contain information about various company guidelines and procedures. 
+The retrieved context provides specific details that can help answer your question.
+
+Key points from the policies:
+- Multiple policy sources were consulted
+- Information is current and accurate
+- Specific requirements and limitations are included
+
+Please refer to the specific policy documents for complete details and any recent updates.
+
+============================================================
+
+🎉 All demos completed!
+You've seen how the complete RAG pipeline works!
