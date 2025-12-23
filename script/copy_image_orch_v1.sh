@@ -71,10 +71,20 @@ get_pod() {
 
 get_images() {
     read -rp "Enter image names (comma-separated): " Image_input
+    
+    if [[ -z "${Image_input// /}" ]]; then
+        log_error "No image names provided. Input cannot be empty"
+        exit 1
+    fi
     IFS=',' read -ra Image_ARRAY <<< "$Image_input"
 
     log_info "Validating ${#Image_ARRAY[@]} image(s)..."
     
+    if [[ ${#Image_ARRAY[@]} -eq 0 ]]; then
+        log_error "No valid image names found after validation"
+        exit 1
+    fi
+
     for img in "${Image_ARRAY[@]}"; do
         img_trimmed=$(echo "$img" | xargs)
         
@@ -86,6 +96,7 @@ get_images() {
     
     log_success "All images validated"
 }
+
 
 
 # Calculate total size of images
